@@ -1,7 +1,10 @@
+sqlite_file_name = "/home/papi/var/x/database.db"
+
 #S: DB 
 from typing import Optional
 from pydantic import constr, EmailStr
 from sqlmodel import Field, Session, SQLModel, Column, String, create_engine, select
+import os
 
 TstrNoVacia= constr(strip_whitespace=True, min_length=2) #A: type alias
 
@@ -18,13 +21,10 @@ class Contacto(SQLModel, table=True):
 	subject: TstrNoVacia
 	message: TstrNoVacia
 	
-
-
-sqlite_file_name = "database.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
 connect_args = {"check_same_thread": False}
-engine = create_engine(sqlite_url, echo=True, connect_args=connect_args)
+engine = create_engine(sqlite_url, echo=False, connect_args=connect_args)
 
 def create_db_and_tables():
 	SQLModel.metadata.create_all(engine)
@@ -41,7 +41,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from typing import Annotated
 
-app = FastAPI()
+app = FastAPI(root_path=os.environ.get("ROOT_PATH",None))
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.on_event("startup")
