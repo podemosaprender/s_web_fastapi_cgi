@@ -23,7 +23,6 @@ run `test/simple.sh` or
 * go to GET and see your list
 
 
-SEE: https://sqlmodel.tiangolo.com/tutorial/fastapi/simple-hero-api/
 
 ## run as cgi with
 
@@ -34,4 +33,6 @@ cd test
 
 (edit variables inside this script as needed)
 
+## Try other database examples
+SEE: https://sqlmodel.tiangolo.com/tutorial/fastapi/simple-hero-api/
 
