@@ -1,7 +1,7 @@
 #S: DB 
 from typing import Optional
-from pydantic import constr
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from pydantic import constr, EmailStr
+from sqlmodel import Field, Session, SQLModel, Column, String, create_engine, select
 
 TstrNoVacia= constr(strip_whitespace=True, min_length=2) #A: type alias
 
@@ -10,6 +10,14 @@ class Hero(SQLModel, table=True):
 	name: TstrNoVacia= Field(index=True)
 	secret_name: TstrNoVacia
 	age: Optional[int] = Field(default=None, index=True)
+
+class Contacto(SQLModel, table=True):
+	id: Optional[int] = Field(default=None, primary_key=True)
+	email: EmailStr= Field(sa_column=Column(String, index=True))
+	name: TstrNoVacia
+	subject: TstrNoVacia
+	message: TstrNoVacia
+	
 
 
 sqlite_file_name = "database.db"
@@ -21,11 +29,11 @@ engine = create_engine(sqlite_url, echo=True, connect_args=connect_args)
 def create_db_and_tables():
 	SQLModel.metadata.create_all(engine)
 
-def save_hero(hero):
+def save_instance(instance):
 	with Session(engine) as session:
-		session.add(hero)
+		session.add(instance)
 		session.commit()
-		session.refresh(hero)
+		session.refresh(instance)
 
 #S: WEB
 from fastapi import FastAPI, Request
@@ -43,7 +51,7 @@ def on_startup():
 
 @app.post("/heroes/")
 def create_hero(hero: Hero):
-	save_hero(hero)
+	save_instance(hero)
 	return hero
 
 
@@ -67,9 +75,27 @@ async def create_hero_form(req: Request):
 			age= int(form.get('age')),
 		), strict=True) #A: raise on error
 		#A: si algo estaba mal lanzo excepcion, OjO! validar bien todos los inputs con tipos o a mano
-		save_hero(hero)
+		save_instance(hero)
 		return RedirectResponse("/static/si_salio_bien.html",status_code=303) #A: 303=see other, GET
 	except:
+		return RedirectResponse("/static/si_salio_mal.html",status_code=303) #A: 303=see other, GET
+
+
+@app.post("/contacto_form/")
+async def contacto_form(req: Request):
+	try:
+		form= await req.form()
+		contacto= Contacto.model_validate(dict(
+			email= form.get('email'),
+			name= form.get('name'),
+			subject= form.get('subject'),
+			message= form.get('message'),
+		), strict=True) #A: raise on error
+		#A: si algo estaba mal lanzo excepcion, OjO! validar bien todos los inputs con tipos o a mano
+		save_instance(contacto)
+		return RedirectResponse("/static/si_salio_bien.html",status_code=303) #A: 303=see other, GET
+	except Exception as ex:
+		print(ex)
 		return RedirectResponse("/static/si_salio_mal.html",status_code=303) #A: 303=see other, GET
 
 	
