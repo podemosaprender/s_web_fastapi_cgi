@@ -1,0 +1,208 @@
+{
+  "id": "b2c5e05f-df79-4699-b34a-145cd223428b",
+  "version": "2.0",
+  "name": "form",
+  "url": "http://127.0.0.1:8000",
+  "tests": [{
+    "id": "f2f811a8-072c-40bc-af58-430e204773c4",
+    "name": "form_test",
+    "commands": [{
+      "id": "163311d8-abb6-4dc6-b529-c1e31520ddfb",
+      "comment": "",
+      "command": "open",
+      "target": "/static/form_contacto.html",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "1d10a6ce-8d0b-49f4-9d42-8e96f14b39eb",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1346x708",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "fe8bd55e-56a0-4ca8-b5de-e745c396e901",
+      "comment": "",
+      "command": "mouseDownAt",
+      "target": "id=name",
+      "targets": [
+        ["id=name", "id"],
+        ["name=name", "name"],
+        ["css=#name", "css:finder"],
+        ["xpath=//input[@id='name']", "xpath:attributes"],
+        ["xpath=//div/input", "xpath:position"]
+      ],
+      "value": "69,12.5625"
+    }, {
+      "id": "16fed60b-84f4-40f0-aaef-871bb426099c",
+      "comment": "",
+      "command": "mouseMoveAt",
+      "target": "id=name",
+      "targets": [
+        ["id=name", "id"],
+        ["name=name", "name"],
+        ["css=#name", "css:finder"],
+        ["xpath=//input[@id='name']", "xpath:attributes"],
+        ["xpath=//div/input", "xpath:position"]
+      ],
+      "value": "69,12.5625"
+    }, {
+      "id": "fa5d5c52-328d-4856-8d78-deaec735d42a",
+      "comment": "",
+      "command": "mouseUpAt",
+      "target": "id=name",
+      "targets": [
+        ["id=name", "id"],
+        ["name=name", "name"],
+        ["css=#name", "css:finder"],
+        ["xpath=//input[@id='name']", "xpath:attributes"],
+        ["xpath=//div/input", "xpath:position"]
+      ],
+      "value": "69,12.5625"
+    }, {
+      "id": "cdd79797-248f-4286-a4c9-30842fed9434",
+      "comment": "",
+      "command": "click",
+      "target": "id=name",
+      "targets": [
+        ["id=name", "id"],
+        ["name=name", "name"],
+        ["css=#name", "css:finder"],
+        ["xpath=//input[@id='name']", "xpath:attributes"],
+        ["xpath=//div/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "14059335-a0d8-41a4-a404-e91b7ee6e71c",
+      "comment": "",
+      "command": "type",
+      "target": "id=name",
+      "targets": [
+        ["id=name", "id"],
+        ["name=name", "name"],
+        ["css=#name", "css:finder"],
+        ["xpath=//input[@id='name']", "xpath:attributes"],
+        ["xpath=//div/input", "xpath:position"]
+      ],
+      "value": "N3"
+    }, {
+      "id": "b9a9e408-cb38-43a6-a25d-460b210340b1",
+      "comment": "",
+      "command": "type",
+      "target": "id=email",
+      "targets": [
+        ["id=email", "id"],
+        ["name=email", "name"],
+        ["css=#email", "css:finder"],
+        ["xpath=//input[@id='email']", "xpath:attributes"],
+        ["xpath=//div[2]/input", "xpath:position"]
+      ],
+      "value": "n3@x.com"
+    }, {
+      "id": "497f1087-f11f-472b-82d9-43e8ae5b279b",
+      "comment": "",
+      "command": "type",
+      "target": "id=subject",
+      "targets": [
+        ["id=subject", "id"],
+        ["name=subject", "name"],
+        ["css=#subject", "css:finder"],
+        ["xpath=//input[@id='subject']", "xpath:attributes"],
+        ["xpath=//form/div[2]/input", "xpath:position"]
+      ],
+      "value": "C3"
+    }, {
+      "id": "d2b0d64e-f4e5-44e2-85bc-ccd6776b1eeb",
+      "comment": "",
+      "command": "type",
+      "target": "id=subject",
+      "targets": [
+        ["id=subject", "id"],
+        ["name=subject", "name"],
+        ["css=#subject", "css:finder"],
+        ["xpath=//input[@id='subject']", "xpath:attributes"],
+        ["xpath=//form/div[2]/input", "xpath:position"]
+      ],
+      "value": "S3"
+    }, {
+      "id": "94e0ed39-4e47-4280-aa2c-5186678b3dc8",
+      "comment": "",
+      "command": "click",
+      "target": "name=message",
+      "targets": [
+        ["name=message", "name"],
+        ["css=.form-group:nth-child(3) > .form-control", "css:finder"],
+        ["xpath=//textarea[@name='message']", "xpath:attributes"],
+        ["xpath=//textarea", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "9b81d743-a8af-42a2-a927-db4eb1bac9a2",
+      "comment": "",
+      "command": "type",
+      "target": "name=message",
+      "targets": [
+        ["name=message", "name"],
+        ["css=.form-group:nth-child(3) > .form-control", "css:finder"],
+        ["xpath=//textarea[@name='message']", "xpath:attributes"],
+        ["xpath=//textarea", "xpath:position"]
+      ],
+      "value": "Trump anunció en 2001 que sería el edificio más alto del mundo, pero tras los atentados del 11 de septiembre de 2001, se redujo su altura y el diseño sufrió varias revisiones. Cuando se concluyó en el año 2009 se convirtió en el segundo edificio más alto de los Estados Unidos tras la Willis Tower de Chicago (anteriormente conocida como Sears Tower), hasta que fue. FIN"
+    }, {
+      "id": "682ee55f-81cb-4573-85c5-5185475388ad",
+      "comment": "",
+      "command": "click",
+      "target": "css=body",
+      "targets": [
+        ["css=body", "css:finder"],
+        ["xpath=//body", "xpath:position"],
+        ["xpath=//body[contains(.,'Salio bien, podria ser una URL en el servidor donde esta el form')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "4dba3edf-09a2-42ef-9efe-8038e7e1115a",
+      "comment": "",
+      "command": "click",
+      "target": "css=body",
+      "targets": [
+        ["css=body", "css:finder"],
+        ["xpath=//body", "xpath:position"],
+        ["xpath=//body[contains(.,'Salio bien, podria ser una URL en el servidor donde esta el form')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "34dd4469-af0b-4512-b073-69e0c6b40702",
+      "comment": "",
+      "command": "assertText",
+      "target": "css=body",
+      "targets": [
+        ["css=body", "css:finder"],
+        ["xpath=//body", "xpath:position"],
+        ["xpath=//body[contains(.,'Salio bien, podria ser una URL en el servidor donde esta el form')]", "xpath:innerText"]
+      ],
+      "value": "Salio bien, podria ser una URL en el servidor donde esta el form"
+    }, {
+      "id": "94ed209b-dec2-48d3-80bd-b1fb6d0ed35f",
+      "comment": "",
+      "command": "click",
+      "target": "css=button",
+      "targets": [
+        ["css=button", "css:finder"],
+        ["xpath=//button[@type='submit']", "xpath:attributes"],
+        ["xpath=//button", "xpath:position"],
+        ["xpath=//button[contains(.,'Send')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "40faff02-fd78-428e-962a-640994146e46",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["f2f811a8-072c-40bc-af58-430e204773c4"]
+  }],
+  "urls": ["http://127.0.0.1:8000/"],
+  "plugins": []
+}
