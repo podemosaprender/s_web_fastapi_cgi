@@ -9,6 +9,11 @@ python -mvenv xfastapi
 pip install -r requirements.txt
 ~~~
 
+On Windows use
+~~~
+. xfastapi/Scripts/activate
+~~~
+
 ## run as standalone server with
 
 ~~~
