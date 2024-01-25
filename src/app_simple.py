@@ -113,9 +113,11 @@ async def contacto_form(req: Request, db_session: AsyncSession = Depends(db_sess
 		), strict=True) #A: raise on error
 		#A: si algo estaba mal lanzo excepcion, OjO! validar bien todos los inputs con tipos o a mano
 		await save_instance(contacto, db_session)
-		return RedirectResponse("/static/si_salio_bien.html",status_code=303) #A: 303=see other, GET
+		url_bien = form.get("url_bien","/static/si_salio_bien.html")
+		url_mal = form.get("url_mal","/static/si_salio_mal.html")
+		return RedirectResponse(url_bien,status_code=303) #A: 303=see other, GET
 	except Exception as ex:
 		print(ex)
-		return RedirectResponse("/static/si_salio_mal.html",status_code=303) #A: 303=see other, GET
+		return RedirectResponse(url_mal,status_code=303) #A: 303=see other, GET
 
 	
