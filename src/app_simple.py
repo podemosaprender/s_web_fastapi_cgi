@@ -28,7 +28,7 @@ class Contacto(SQLModel, table=True):
 	subject: TstrNoVacia
 	message: TstrNoVacia
 
-engine= AsyncEngine( create_engine(db_url, echo=True, future=True) )
+engine= AsyncEngine( create_engine(db_url, echo=False, future=True) )
 
 async def db_init() -> None:
 	async with engine.begin() as conn:
