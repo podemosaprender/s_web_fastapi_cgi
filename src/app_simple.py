@@ -41,11 +41,10 @@ async def db_session() -> AsyncSession:
     async with async_session() as session:
         yield session
 
-def save_instance(instance):
-	with Session(engine) as session:
-		session.add(instance)
-		session.commit()
-		session.refresh(instance)
+async def save_instance(instance, session):
+	session.add(instance)
+	await session.commit()
+	await session.refresh(instance)
 
 #S: WEB
 from fastapi import FastAPI, Depends, Request
@@ -62,13 +61,9 @@ async def on_startup():
 	await db_init()	
 
 @app.post("/heroes/")
-def create_hero(hero: Hero):
-	save_instance(hero)
+async def create_hero(hero: Hero, db_session: AsyncSession = Depends(db_session)):
+	await save_instance(hero, db_session)
 	return hero
-
-async def fake_streamer(r):
-	for row in CSVIter(r):
-		yield row
 
 @app.get("/heroes/")
 async def read_heroes(fmt: str="json", db_session: AsyncSession = Depends(db_session)):
@@ -84,7 +79,7 @@ async def read_heroes(fmt: str="json", db_session: AsyncSession = Depends(db_ses
 #SEE: https://fastapi.tiangolo.com/advanced/using-request-directly/
 #SEE: https://www.starlette.io/requests/
 @app.post("/heroes_form/")
-async def create_hero_form(req: Request):
+async def create_hero_form(req: Request, db_session: AsyncSession = Depends(db_session)):
 	try:
 		form= await req.form()
 		hero= Hero.model_validate(dict(
@@ -94,14 +89,14 @@ async def create_hero_form(req: Request):
 			age= int(form.get('age')),
 		), strict=True) #A: raise on error
 		#A: si algo estaba mal lanzo excepcion, OjO! validar bien todos los inputs con tipos o a mano
-		save_instance(hero)
+		await save_instance(hero, db_session)
 		return RedirectResponse("/static/si_salio_bien.html",status_code=303) #A: 303=see other, GET
 	except:
 		return RedirectResponse("/static/si_salio_mal.html",status_code=303) #A: 303=see other, GET
 
 
 @app.post("/contacto_form/")
-async def contacto_form(req: Request):
+async def contacto_form(req: Request, db_session: AsyncSession = Depends(db_session)):
 	try:
 		form= await req.form()
 		contacto= Contacto.model_validate(dict(
@@ -111,7 +106,7 @@ async def contacto_form(req: Request):
 			message= form.get('message'),
 		), strict=True) #A: raise on error
 		#A: si algo estaba mal lanzo excepcion, OjO! validar bien todos los inputs con tipos o a mano
-		save_instance(contacto)
+		await save_instance(contacto, db_session)
 		return RedirectResponse("/static/si_salio_bien.html",status_code=303) #A: 303=see other, GET
 	except Exception as ex:
 		print(ex)
