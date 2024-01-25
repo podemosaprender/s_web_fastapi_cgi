@@ -60,6 +60,15 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def on_startup():
 	await db_init()	
 
+async def read_any(cls, fmt: str, db_session: AsyncSession):
+		if (fmt=="csv"):
+			async with engine.begin() as cx:
+				results = await cx.execute(select(cls)) #A: not typed
+				return StreamingResponse( CSVIter(results, columns=results.keys()) )
+		else:
+			results = await db_session.exec(select(cls)) #A: typed!
+			return results.all()
+
 @app.post("/heroes/")
 async def create_hero(hero: Hero, db_session: AsyncSession = Depends(db_session)):
 	await save_instance(hero, db_session)
@@ -67,13 +76,7 @@ async def create_hero(hero: Hero, db_session: AsyncSession = Depends(db_session)
 
 @app.get("/heroes/")
 async def read_heroes(fmt: str="json", db_session: AsyncSession = Depends(db_session)):
-		if (fmt=="csv"):
-			async with engine.begin() as cx:
-				heroes = await cx.execute(select(Hero)) #A: not typed
-				return StreamingResponse( CSVIter(heroes, columns=heroes.keys()) )
-		else:
-			heroes = await db_session.exec(select(Hero)) #A: typed!
-			return heroes.all()
+	return await read_any(Hero, fmt, db_session)
 
 #SEE: https://stackoverflow.com/questions/74009210/how-to-create-a-fastapi-endpoint-that-can-accept-either-form-or-json-body
 #SEE: https://fastapi.tiangolo.com/advanced/using-request-directly/
@@ -94,6 +97,9 @@ async def create_hero_form(req: Request, db_session: AsyncSession = Depends(db_s
 	except:
 		return RedirectResponse("/static/si_salio_mal.html",status_code=303) #A: 303=see other, GET
 
+@app.get("/contacto/")
+async def read_contactos(fmt: str="json", db_session: AsyncSession = Depends(db_session)):
+	return await read_any(Contacto, fmt, db_session)
 
 @app.post("/contacto_form/")
 async def contacto_form(req: Request, db_session: AsyncSession = Depends(db_session)):
