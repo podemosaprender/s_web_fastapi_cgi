@@ -1,10 +1,17 @@
-sqlite_file_name = "/home/papi/var/x/database.db"
-
 #S: DB 
 from typing import Optional
 from pydantic import constr, EmailStr
+
 from sqlmodel import Field, Session, SQLModel, Column, String, create_engine, select
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.orm import sessionmaker
+
+import asyncio
 import os
+
+sqlite_file_name = os.environ.get("DB_SQLITE_PATH","database.db") #A: if DB_URL not defined
+db_url = os.environ.get("DB_URL", f"sqlite+aiosqlite:///{sqlite_file_name}")
 
 TstrNoVacia= constr(strip_whitespace=True, min_length=2) #A: type alias
 
@@ -20,14 +27,19 @@ class Contacto(SQLModel, table=True):
 	name: TstrNoVacia
 	subject: TstrNoVacia
 	message: TstrNoVacia
-	
-sqlite_url = f"sqlite:///{sqlite_file_name}"
 
-connect_args = {"check_same_thread": False}
-engine = create_engine(sqlite_url, echo=False, connect_args=connect_args)
+engine= AsyncEngine( create_engine(db_url, echo=True, future=True) )
 
-def create_db_and_tables():
-	SQLModel.metadata.create_all(engine)
+async def db_init() -> None:
+	async with engine.begin() as conn:
+		await conn.run_sync(SQLModel.metadata.create_all)
+
+async def db_session() -> AsyncSession:
+    async_session = sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
+    async with async_session() as session:
+        yield session
 
 def save_instance(instance):
 	with Session(engine) as session:
@@ -36,30 +48,37 @@ def save_instance(instance):
 		session.refresh(instance)
 
 #S: WEB
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Depends, Request
 from fastapi.staticfiles import StaticFiles 
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from typing import Annotated
+from util.csviter import CSVIter
 
 app = FastAPI(root_path=os.environ.get("ROOT_PATH",None))
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.on_event("startup")
-def on_startup():
-	create_db_and_tables()
-
+async def on_startup():
+	await db_init()	
 
 @app.post("/heroes/")
 def create_hero(hero: Hero):
 	save_instance(hero)
 	return hero
 
+async def fake_streamer(r):
+	for row in CSVIter(r):
+		yield row
 
 @app.get("/heroes/")
-def read_heroes():
-	with Session(engine) as session:
-		heroes = session.exec(select(Hero)).all()
-		return heroes
+async def read_heroes(fmt: str="json", db_session: AsyncSession = Depends(db_session)):
+		if (fmt=="csv"):
+			async with engine.begin() as cx:
+				heroes = await cx.execute(select(Hero)) #A: not typed
+				return StreamingResponse( CSVIter(heroes, columns=heroes.keys()) )
+		else:
+			heroes = await db_session.exec(select(Hero)) #A: typed!
+			return heroes.all()
 
 #SEE: https://stackoverflow.com/questions/74009210/how-to-create-a-fastapi-endpoint-that-can-accept-either-form-or-json-body
 #SEE: https://fastapi.tiangolo.com/advanced/using-request-directly/
