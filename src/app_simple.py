@@ -96,18 +96,18 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def on_startup():
 	await db_init()	
 
-async def read_any(a_select, fmt: str, db_session: AsyncSession, mapf= None, columns= None):
+async def read_any(a_select, fmt: str, db_session: AsyncSession, mapf= None, mapf_data= None, columns= None):
 		if (fmt=="csv"):
 			async with engine.begin() as cx:
 				results = await cx.execute(a_select) #A: not typed
 				columns= results.keys() if columns is None else columns
 
-				return StreamingResponse( CSVIter(results, mapf= mapf, columns=columns), media_type="text/csv" )
+				return StreamingResponse( CSVIter(results, mapf= mapf, mapf_data= mapf_data, columns=columns), media_type="text/csv" )
 		else:
 			results = await db_session.exec(a_select) #A: typed!
 			return results.all()
 
-def expand_moredata(kv_or_arr, columns):
+def expand_moredata(kv_or_arr, columns, more_data_idx):
 	if type(kv_or_arr)==dict:
 		if 'more_data' in kv:
 			kv={ **kv, **json.loads(kv['more_data']) }
@@ -115,30 +115,30 @@ def expand_moredata(kv_or_arr, columns):
 		return kv	
 	else:
 		try:
-			idx= list(columns).index('more_data')
-			json_str= kv_or_arr[idx]
-			return list(kv_or_arr[:idx])+list(kv_or_arr[(idx+1):])+list(json.loads(json_str).values())
+			json_str= kv_or_arr[more_data_idx]
+			return list(kv_or_arr[:more_data_idx])+list(kv_or_arr[(more_data_idx+1):])+list(json.loads(json_str).values())
 		except Exception as ex:
-			#DBG: print("expand_moredata",columns,ex)
+			logm("expand_moredata",columns=columns,ex=ex)
 			pass
 
 	return kv_or_arr #DFTL, unchanged
 
 def expand_moredata_cols(columns, expanded):
 	idx= list(columns).index('more_data')
-	return list(columns[:idx])+list(columns[(idx+1):])+list(expanded)
+	return list(columns[:idx])+list(columns[(idx+1):])+list(expanded), idx
 
 @app.get("/data/")
 async def read_data(fmt: str="json", entity: str="any", db_session: AsyncSession = Depends(db_session)):
 	columns= None #DFLT
+	more_data_idx= None
 	a_select= select(AnyForm) #DFLT
 	entity_cls= Entities.get(entity,None)
 	if not entity_cls is None:
-		columns= expand_moredata_cols(keys_for_validator(AnyForm), keys_for_validator(entity_cls))
+		(columns, more_data_idx)= expand_moredata_cols(keys_for_validator(AnyForm), keys_for_validator(entity_cls))
 		a_select= a_select.where(AnyForm.entity	== entity)
 
 	logm("read_data",entity_cls=entity_cls,columns=columns)
-	return await read_any(a_select, fmt, db_session, mapf= expand_moredata, columns=columns)
+	return await read_any(a_select, fmt, db_session, mapf= expand_moredata, mapf_data= more_data_idx, columns=columns)
 
 #SEE: https://stackoverflow.com/questions/74009210/how-to-create-a-fastapi-endpoint-that-can-accept-either-form-or-json-body
 #SEE: https://fastapi.tiangolo.com/advanced/using-request-directly/

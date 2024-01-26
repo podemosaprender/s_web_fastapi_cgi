@@ -11,9 +11,10 @@ from collections import deque
 import csv
 
 class CSVIter:
-	def __init__(self, iterable, mapf=None, columns=None, **csvparams):
+	def __init__(self, iterable, mapf=None, mapf_data=None, columns=None, **csvparams):
 		self.iter= iterable.__iter__() #U: we consume from iter
 		self.mapf= mapf #U: we may apply a map function
+		self.mapf_data= mapf_data #U: we may apply a map function
 		self.q= deque() #U: csv writes to queue (may call write many times for one writerow)
 		self.csvw= csv.writer(self,**csvparams) #U: we are the "file" XXX: pass options
 		self.columns= columns
@@ -32,7 +33,7 @@ class CSVIter:
 			while row is None: 
 				row= self.iter.__next__() #A: rases Exception if no more elements
 				if self.mapf:
-					row= self.mapf(row, self.columns)
+					row= self.mapf(row, self.columns, self.mapf_data)
 					#DBG: print("X mapf",self.mapf,row)
 
 			self.csvw.writerow(row)
