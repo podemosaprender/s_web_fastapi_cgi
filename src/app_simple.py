@@ -1,8 +1,10 @@
 #S: DB 
 from typing import Optional
 from pydantic import constr, EmailStr
+from datetime import datetime
 
-from sqlmodel import Field, Session, SQLModel, Column, String, create_engine, select
+
+from sqlmodel import Field, Session, SQLModel, Column, String, TIMESTAMP, text, create_engine, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.orm import sessionmaker
@@ -21,6 +23,11 @@ class Contacto(SQLModel, table=True):
 	name: TstrNoVacia
 	subject: TstrNoVacia
 	message: TstrNoVacia
+	created_datetime: Optional[datetime] = Field(sa_column=Column(
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP"),
+    ))
 
 engine= AsyncEngine( create_engine(db_url, echo=False, future=True) )
 
