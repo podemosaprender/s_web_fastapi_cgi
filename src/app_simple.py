@@ -53,6 +53,8 @@ app = FastAPI(root_path=os.environ.get("ROOT_PATH",None))
 #S: CORS {
 origins = [
 	"http://localhost:8000", "http://127.0.0.1:8000",
+	"https://sebasego.github.io",
+	"https://ventum.dev", "http://ventum.dev",
 ]
 
 app.add_middleware(
