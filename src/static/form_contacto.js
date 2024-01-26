@@ -2,7 +2,7 @@
 
 const DBG= window.DBG_FORM; //U: set DBG_FORM=true before loading this script to enable debugging
 
-const URL= 'http://localhost:8000/contacto_form/' //U: where to post //XXX:ajustar al host publico!
+const URL= 'https://api1.o-o.fyi/v1/form/contacto_form/' //U: where to post //XXX:ajustar al host publico!
 const FORM_SELECTORS=['.php-email-form'] //U: how to find the forms //XXX:que pueda cambiar como DBG
 
 DBG && console.log("FORM", {URL, FORM_SELECTORS});
