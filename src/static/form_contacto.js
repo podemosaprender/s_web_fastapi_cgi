@@ -3,7 +3,7 @@
 const DBG= window.DBG_FORM; //U: set DBG_FORM=true before loading this script to enable debugging
 
 const URL= 'http://localhost:8000/contacto_form/' //U: where to post //XXX:ajustar al host publico!
-const FORM_SELECTORS=['.php-email-form'] //U: how to find the forms
+const FORM_SELECTORS=['.php-email-form'] //U: how to find the forms //XXX:que pueda cambiar como DBG
 
 DBG && console.log("FORM", {URL, FORM_SELECTORS});
 
@@ -28,7 +28,7 @@ async function onSubmitImpl(e) {
 
 	let res= ''
 	try {
-		res= await fetch(URL, { method: 'post', body: data} ).then( xres => xres.text() )
+		res= await fetch(URL, { method: 'POST', body: data} ).then( xres => xres.text() )
 		DBG && console.log('FORM SENT', res);
 	} catch (ex) {
 		DBG && console.log('FORM ERROR', ex);
@@ -42,7 +42,7 @@ function onSubmit(e) { e.preventDefault(); onSubmitImpl(e); return false; }
 FORM_SELECTORS.forEach(selector => 
 	document.querySelectorAll(selector).forEach(el => {
 		el.addEventListener('submit', onSubmit)
-		feedback(el)
+		feedback(el) //A:Hide all messages
 		DBG && console.log("FORM EL FOUND", el);
 	})
 )
