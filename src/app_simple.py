@@ -73,6 +73,7 @@ app = FastAPI(root_path=os.environ.get("ROOT_PATH",None))
 
 AUTHORIZED_ORIGINS = [
 	"http://localhost:8000", "http://127.0.0.1:8000",
+	"https://api1.o-o.fyi", "http://api1.o-o.fyi",
 	"https://sebasego.github.io",
 	"https://ventum.dev", "http://ventum.dev",
 ]
