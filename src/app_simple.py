@@ -19,6 +19,7 @@ db_url = os.environ.get("DB_URL", f"sqlite+aiosqlite:///{sqlite_file_name}")
 
 def keys_for_validator(validator):
 	return list(validator.__annotations__.keys())
+
 Entities= {} #U: name -> class
 
 TstrNoVacia= constr(strip_whitespace=True, min_length=2) #A: type alias
