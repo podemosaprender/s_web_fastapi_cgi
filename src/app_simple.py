@@ -48,12 +48,28 @@ async def save_instance(instance, session):
 
 #S: WEB
 from fastapi import FastAPI, Depends, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles 
-from fastapi.responses import RedirectResponse, StreamingResponse
+from fastapi.responses import RedirectResponse, StreamingResponse, HTMLResponse
 from typing import Annotated
 from util.csviter import CSVIter
 
 app = FastAPI(root_path=os.environ.get("ROOT_PATH",None))
+
+#S: CORS {
+origins = [
+	"http://localhost:8000", "http://127.0.0.1:8000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+#S: CORS }
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.on_event("startup")
@@ -103,21 +119,33 @@ async def read_contactos(fmt: str="json", db_session: AsyncSession = Depends(db_
 
 @app.post("/contacto_form/")
 async def contacto_form(req: Request, db_session: AsyncSession = Depends(db_session)):
+	dontRedirect= False
 	try:
 		form= await req.form()
-		contacto= Contacto.model_validate(dict(
+		dontRedirect= form.get('dontRedirect',False) 
+		url_bien = form.get("url_bien","/static/si_salio_bien.html")
+		url_mal = form.get("url_mal","/static/si_salio_mal.html")
+		#DBG: print("dontRedirect", dontRedirect)
+
+		contacto_data= dict(
 			email= form.get('email'),
 			name= form.get('name'),
 			subject= form.get('subject'),
 			message= form.get('message'),
-		), strict=True) #A: raise on error
+		)
+		#DBG: print("CONTACTO FORM", contacto_data);
+
+		contacto= Contacto.model_validate(contacto_data, strict=True) #A: raise on error
 		#A: si algo estaba mal lanzo excepcion, OjO! validar bien todos los inputs con tipos o a mano
 		await save_instance(contacto, db_session)
-		url_bien = form.get("url_bien","/static/si_salio_bien.html")
-		url_mal = form.get("url_mal","/static/si_salio_mal.html")
+
+		if dontRedirect: 
+			return HTMLResponse("ok") 
 		return RedirectResponse(url_bien,status_code=303) #A: 303=see other, GET
 	except Exception as ex:
 		print(ex)
+		if dontRedirect: 
+			return HTMLResponse("error "+str(ex)) 
 		return RedirectResponse(url_mal,status_code=303) #A: 303=see other, GET
 
 	
