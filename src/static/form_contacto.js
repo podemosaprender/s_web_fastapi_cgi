@@ -1,9 +1,10 @@
 //INFO: contact form script to include in any html
 
-const DBG= window.DBG_FORM; //U: set DBG_FORM=true before loading this script to enable debugging
+const isLocalHost= window.location.host.startsWith("127.") || window.location.host.startsWith("localhost") 
+const DBG= window.DBG_FORM || window.location.hash.includes('o-o-form-debug'); //U: add #o-o-form-debig to the url set DBG_FORM=true before loading this script to enable debugging
 
-const URL= 'https://api1.o-o.fyi/v1/form/contacto_form/' //U: where to post //XXX:ajustar al host publico!
-const FORM_SELECTORS=['.php-email-form'] //U: how to find the forms //XXX:que pueda cambiar como DBG
+const URL= isLocalHost ? window.location.protocol+'//'+window.location.host+'/asform/' : 'https://api1.o-o.fyi/v1/form/asform/' 
+const FORM_SELECTORS= window.FORM_SELECTORS || ['.php-email-form','.o-o-form'] //U: how to find the forms
 
 DBG && console.log("FORM", {URL, FORM_SELECTORS});
 
@@ -24,7 +25,7 @@ async function onSubmitImpl(e) {
 
 	feedback(form_el, 'loading')
 	const data= new FormData(form_el)
-	data.append('dontRedirect', true)
+	data.append('o-o-form-dont-redirect', true)
 
 	let res= ''
 	try {
