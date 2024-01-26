@@ -66,7 +66,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, StreamingResponse, HTMLResponse
 from typing import Annotated
 from util.csviter import CSVIter
-
+from util.logm import logm
 import json
 import re
 
@@ -137,6 +137,7 @@ async def read_data(fmt: str="json", entity: str="any", db_session: AsyncSession
 		columns= expand_moredata_cols(keys_for_validator(AnyForm), keys_for_validator(entity_cls))
 		a_select= a_select.where(AnyForm.entity	== entity)
 
+	logm("read_data",entity_cls=entity_cls,columns=columns)
 	return await read_any(a_select, fmt, db_session, mapf= expand_moredata, columns=columns)
 
 #SEE: https://stackoverflow.com/questions/74009210/how-to-create-a-fastapi-endpoint-that-can-accept-either-form-or-json-body
