@@ -174,8 +174,7 @@ async def save_asform(req: Request, db_session: AsyncSession = Depends(db_sessio
 				obj= validator.model_validate(data, strict=True) #A: raise on error
 			else:
 				data= { k:form.get(k) for k in form.keys() if not k.startswith("o-o-form-") }
-			#DBG: 
-			print("ASFORM", data);
+			#DBG: print("ASFORM", data);
 
 			#A: si algo estaba mal lanzo excepcion, OjO! validar bien todos los inputs con tipos o a mano
 			await save_instance(
