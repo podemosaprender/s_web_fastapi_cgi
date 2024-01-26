@@ -15,12 +15,6 @@ db_url = os.environ.get("DB_URL", f"sqlite+aiosqlite:///{sqlite_file_name}")
 
 TstrNoVacia= constr(strip_whitespace=True, min_length=2) #A: type alias
 
-class Hero(SQLModel, table=True):
-	id: Optional[int] = Field(default=None, primary_key=True)
-	name: TstrNoVacia= Field(index=True)
-	secret_name: TstrNoVacia
-	age: Optional[int] = Field(default=None, index=True)
-
 class Contacto(SQLModel, table=True):
 	id: Optional[int] = Field(default=None, primary_key=True)
 	email: EmailStr= Field(sa_column=Column(String, index=True))
@@ -85,38 +79,13 @@ async def read_any(cls, fmt: str, db_session: AsyncSession):
 			results = await db_session.exec(select(cls)) #A: typed!
 			return results.all()
 
-@app.post("/heroes/")
-async def create_hero(hero: Hero, db_session: AsyncSession = Depends(db_session)):
-	await save_instance(hero, db_session)
-	return hero
-
-@app.get("/heroes/")
-async def read_heroes(fmt: str="json", db_session: AsyncSession = Depends(db_session)):
-	return await read_any(Hero, fmt, db_session)
-
-#SEE: https://stackoverflow.com/questions/74009210/how-to-create-a-fastapi-endpoint-that-can-accept-either-form-or-json-body
-#SEE: https://fastapi.tiangolo.com/advanced/using-request-directly/
-#SEE: https://www.starlette.io/requests/
-@app.post("/heroes_form/")
-async def create_hero_form(req: Request, db_session: AsyncSession = Depends(db_session)):
-	try:
-		form= await req.form()
-		hero= Hero.model_validate(dict(
-			id= int(form.get('id')),
-			name= form.get('name'),
-			secret_name= form.get('secret_name'),
-			age= int(form.get('age')),
-		), strict=True) #A: raise on error
-		#A: si algo estaba mal lanzo excepcion, OjO! validar bien todos los inputs con tipos o a mano
-		await save_instance(hero, db_session)
-		return RedirectResponse("/static/si_salio_bien.html",status_code=303) #A: 303=see other, GET
-	except:
-		return RedirectResponse("/static/si_salio_mal.html",status_code=303) #A: 303=see other, GET
-
 @app.get("/contacto/")
 async def read_contactos(fmt: str="json", db_session: AsyncSession = Depends(db_session)):
 	return await read_any(Contacto, fmt, db_session)
 
+#SEE: https://stackoverflow.com/questions/74009210/how-to-create-a-fastapi-endpoint-that-can-accept-either-form-or-json-body
+#SEE: https://fastapi.tiangolo.com/advanced/using-request-directly/
+#SEE: https://www.starlette.io/requests/
 @app.post("/contacto_form/")
 async def contacto_form(req: Request, db_session: AsyncSession = Depends(db_session)):
 	dontRedirect= False

@@ -10,7 +10,7 @@
       "id": "163311d8-abb6-4dc6-b529-c1e31520ddfb",
       "comment": "",
       "command": "open",
-      "target": "/static/form_contacto.html",
+      "target": "/static/form_contacto_js.html",
       "targets": [],
       "value": ""
     }, {
@@ -149,25 +149,15 @@
       ],
       "value": "Trump anunció en 2001 que sería el edificio más alto del mundo, pero tras los atentados del 11 de septiembre de 2001, se redujo su altura y el diseño sufrió varias revisiones. Cuando se concluyó en el año 2009 se convirtió en el segundo edificio más alto de los Estados Unidos tras la Willis Tower de Chicago (anteriormente conocida como Sears Tower), hasta que fue. FIN"
     }, {
-      "id": "682ee55f-81cb-4573-85c5-5185475388ad",
+      "id": "94ed209b-dec2-48d3-80bd-b1fb6d0ed35f",
       "comment": "",
       "command": "click",
-      "target": "css=body",
+      "target": "css=button",
       "targets": [
-        ["css=body", "css:finder"],
-        ["xpath=//body", "xpath:position"],
-        ["xpath=//body[contains(.,'Salio bien, podria ser una URL en el servidor donde esta el form')]", "xpath:innerText"]
-      ],
-      "value": ""
-    }, {
-      "id": "4dba3edf-09a2-42ef-9efe-8038e7e1115a",
-      "comment": "",
-      "command": "click",
-      "target": "css=body",
-      "targets": [
-        ["css=body", "css:finder"],
-        ["xpath=//body", "xpath:position"],
-        ["xpath=//body[contains(.,'Salio bien, podria ser una URL en el servidor donde esta el form')]", "xpath:innerText"]
+        ["css=button", "css:finder"],
+        ["xpath=//button[@type='submit']", "xpath:attributes"],
+        ["xpath=//button", "xpath:position"],
+        ["xpath=//button[contains(.,'Send')]", "xpath:innerText"]
       ],
       "value": ""
     }, {
@@ -180,19 +170,7 @@
         ["xpath=//body", "xpath:position"],
         ["xpath=//body[contains(.,'Salio bien, podria ser una URL en el servidor donde esta el form')]", "xpath:innerText"]
       ],
-      "value": "Salio bien, podria ser una URL en el servidor donde esta el form"
-    }, {
-      "id": "94ed209b-dec2-48d3-80bd-b1fb6d0ed35f",
-      "comment": "",
-      "command": "click",
-      "target": "css=button",
-      "targets": [
-        ["css=button", "css:finder"],
-        ["xpath=//button[@type='submit']", "xpath:attributes"],
-        ["xpath=//button", "xpath:position"],
-        ["xpath=//button[contains(.,'Send')]", "xpath:innerText"]
-      ],
-      "value": ""
+      "value": "Your message has been sent. Thank you!"
     }]
   }],
   "suites": [{
