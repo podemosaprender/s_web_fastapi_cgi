@@ -1,13 +1,15 @@
-#S: Connection
+#S: DB Connection, async
+from .cfg import cfg_for
+from .logging import logm
+
 from sqlmodel import SQLModel, create_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.orm import sessionmaker
 
-import os
-
-sqlite_file_name = os.environ.get("DB_SQLITE_PATH","database.db") #A: if DB_URL not defined
-db_url = os.environ.get("DB_URL", f"sqlite+aiosqlite:///{sqlite_file_name}")
+sqlite_file_name = cfg_for("DB_SQLITE_PATH","database.db") #A: if DB_URL not defined
+db_url = cfg_for("DB_URL", f"sqlite+aiosqlite:///{sqlite_file_name}")
+logm("DB init connecting to", db_url)
 engine= AsyncEngine( create_engine(db_url, echo=False, future=True) )
 
 async def db_init() -> None:
@@ -21,5 +23,8 @@ async def db_session() -> AsyncSession:
     async with async_session() as session:
         yield session
 
-
+async def save_instance(instance, session):
+	session.add(instance)
+	await session.commit()
+	await session.refresh(instance)
 

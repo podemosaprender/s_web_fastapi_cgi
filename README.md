@@ -1,7 +1,7 @@
 # s_web_fastapi_cgi
 FastApi + SQLModel + CGI
 
-## install deps with
+## Install deps with
 
 ~~~
 python -mvenv xfastapi
@@ -11,14 +11,15 @@ pip install -r requirements.txt
 
 On Windows use
 ~~~
+pip install -r requirements-win.txt
 . xfastapi/Scripts/activate
 ~~~
 
-## run as standalone server with
+## Run as standalone development server with
 
 ~~~
 cd src
-uvicorn app_simple:app --reload
+uvicorn web_main:app --reload
 ~~~
 
 run `test/simple.sh` or
@@ -27,17 +28,27 @@ run `test/simple.sh` or
 * go to POST, "Try it out", edit de json file to add some heroes
 * go to GET and see your list
 
+## Run as cgi with
 
-
-## run as cgi with
-
-~~~
-cd test
-./cgi.sh
-~~~
+XXX:update to new std_env scripts
 
 (edit variables inside this script as needed)
 
-## Try other database examples
+## Source code 
+
+under `src/`
+
+* Specific for this app
+   * form_app: we create a dir for each "app" (like django), NOTICE models my be used separatedly e.g. by discord bots, scripts, etc.
+   * static: any static files we may deploy to a faster, optimized static web server
+* Generic for many apps
+   * web_main
+   * util
+
+You shouldn't change the code generic for many apps BUT in case you make a *generic* improvement please notify everybody.
+
+## Other database examples
+
 SEE: https://sqlmodel.tiangolo.com/tutorial/fastapi/simple-hero-api/
+
 

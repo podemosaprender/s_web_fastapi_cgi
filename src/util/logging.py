@@ -1,5 +1,6 @@
 import logging
 import threading
+from inspect import isclass
 from .debug import debug
 
 LOGM_FORMAT = '%(asctime)s:%(process)d:%(message)s'
@@ -93,7 +94,8 @@ def logm(m="LOG", ch="", t="DBG",l=1,ex=None,**kwargs):
 	#debug(globals(),locals())
 	data = {}
 	for k,v in kwargs.items():
-		data[k]= v(kwargs) if callable(v) else v #U: podes pasar una funcion o lambda para parametros costosos de computar
+		print(f"{k}=={type(k)}")
+		data[k]= v(kwargs) if callable(v) and not isclass(v) else v #U: podes pasar una funcion o lambda para parametros costosos de computar, pero las clases no seran invocadas
 
 	#U: logm(hola=20, mau="texto", fu=lambda a: a.get("hola",100)+30)
 

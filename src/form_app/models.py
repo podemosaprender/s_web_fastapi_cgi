@@ -1,20 +1,17 @@
-#S: DB 
+#S: Models
+
 from typing import Optional
 from pydantic import constr, EmailStr
 from sqlmodel import SQLModel, Field, Column, String
 
 from datetime import datetime
-import os
-
-
-#S: Models
 
 def keys_for_validator(validator):
 	return list(validator.__annotations__.keys())
 
 Entities= {} #U: name -> class
 
-TstrNoVacia= constr(strip_whitespace=True, min_length=2) #A: type alias
+TstrNoVacia= constr(strip_whitespace=True, min_length=1) #A: type alias
 
 class AnyForm(SQLModel, table=True): #U: Base for anything we store
 	id: Optional[int] = Field(default=None, primary_key=True)
@@ -32,9 +29,5 @@ class ContactForm(SQLModel): #U: a specialized model/validator
 
 Entities['contact']= ContactForm
 
-async def save_instance(instance, session):
-	session.add(instance)
-	await session.commit()
-	await session.refresh(instance)
 
 
