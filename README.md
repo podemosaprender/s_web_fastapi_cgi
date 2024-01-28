@@ -6,12 +6,12 @@ FastApi + SQLModel + CGI
 ~~~
 python -mvenv xfastapi
 . xfastapi/bin/activate
-pip install -r requirements.txt
+python requirements.py
 ~~~
 
 On Windows use
 ~~~
-pip install -r requirements-win.txt
+python requirements.py
 . xfastapi/Scripts/activate
 ~~~
 

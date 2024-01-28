@@ -1,8 +1,14 @@
 #S: WEB
+from util.logging import logm
 from util.cfg import cfg_init, cfg_for
 cfg_init() #A: other modules may depend
 
-from form_app.routes import router
+from importlib import import_module
+APPS= cfg_for('APPS',[]) #XXX:auto discover
+logm("WEB",APPS=APPS)
+APPS_ROUTERS= {an_app:import_module(an_app+".routes") for an_app in APPS } 
+
+#A: all models registered in metadata
 from util.db_cx_async import db_init, db_session
 
 from fastapi import FastAPI, Depends, Request
@@ -33,4 +39,5 @@ app.mount("/static", StaticFiles(directory="static"), name="static") #XXX:CFG
 async def on_startup():
 	await db_init()	
 
-app.include_router(router)
+for k,routes in APPS_ROUTERS.items():
+	app.include_router(routes.router)
