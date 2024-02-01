@@ -69,6 +69,7 @@ async def save_asform(req: Request, db_session: AsyncSession = Depends(db_sessio
 	url_mal= "/"
 	try:
 		#XXX:LIB as middleware? {
+		#XXX:USE https://fastapi.tiangolo.com/tutorial/header-params/ ?
 		referer = req.headers.get('referer','')
 		#DBG: print("referer", referer);
 		is_authorized= False #DFLT
