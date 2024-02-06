@@ -16,6 +16,7 @@ PACKAGES=[
 	'aiosqlite', #U: we always include sqlite for testing, etc
 	'"python-jose[cryptography]"', #U: for JWT Auth
 	'passlib', #U: hash pass
+	'bcrypt==4.0.1', #U: backend for passlib, this older version required
 ]
 
 if not '-nopg' in sys.argv:
