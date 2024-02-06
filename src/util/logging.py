@@ -28,7 +28,7 @@ def patch_logger(l):
 			l.setStyle('%')
 		if getattr(l,'formatter',None)!=None:
 			l.formatter=formatter
-		print(f"Logging patched {l}")
+		#XXX:CGI print(f"Logging patched {l}")
 
 		l.patched= True
 
@@ -94,7 +94,7 @@ def logm(m="LOG", ch="", t="DBG",l=1,ex=None,**kwargs):
 	#debug(globals(),locals())
 	data = {}
 	for k,v in kwargs.items():
-		print(f"{k}=={type(k)}")
+		#XXX:CGI print(f"{k}=={type(k)}")
 		data[k]= v(kwargs) if callable(v) and not isclass(v) else v #U: podes pasar una funcion o lambda para parametros costosos de computar, pero las clases no seran invocadas
 
 	#U: logm(hola=20, mau="texto", fu=lambda a: a.get("hola",100)+30)
