@@ -1,0 +1,14 @@
+{
+	"NO-DB_URL": "postgresql+asyncpg://postgres:dev_pg_root@localhost/api1",
+	"AUTHORIZED_ORIGINS": [
+		"http://localhost:8000", "http://127.0.0.1:8000",
+		"https://api1.o-o.fyi", "http://api1.o-o.fyi",
+		"https://sebasego.github.io"
+	],
+	"APPS": ["form_app","auth_app", "booking_app"],
+	"AUTH_SECRET_KEY": "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7",
+	"AUTH_PUBLIC_KEY": "",
+	"AUTH_ALGORITHM": "HS256",
+	"AUTH_ACCESS_TOKEN_EXPIRE_MINUTES": 30 
+}
+

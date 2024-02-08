@@ -19,7 +19,7 @@ python requirements.py
 
 ~~~
 cd src
-uvicorn web_main:app --reload
+ENV=../env_devel.json uvicorn web_main:app --reload
 ~~~
 
 run `test/simple.sh` or
