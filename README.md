@@ -51,4 +51,10 @@ You shouldn't change the code generic for many apps BUT in case you make a *gene
 
 SEE: https://sqlmodel.tiangolo.com/tutorial/fastapi/simple-hero-api/
 
+## Auth JWT
+
+1. Get token with johndoe / secreto in http://127.0.0.1:8000/docs#/default/login_for_access_token_auth_token_post
+2. copy the token with quotes 
+3. on the terminal write `token=` and paste the token with quotes
+4. on the terminal paste `curl -H "Authorization: Bearer $token" http://localhost:8000/auth/users/me/`
 
