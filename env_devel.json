@@ -6,9 +6,9 @@
 		"https://sebasego.github.io"
 	],
 	"APPS": ["form_app","auth_app"],
-	"AUTH_SECRET_KEY": "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7",
-	"AUTH_PUBLIC_KEY": "",
-	"AUTH_ALGORITHM": "HS256",
+	"AUTH_SECRET_KEY": "FILE:$ENV/devel_key_private.pem",
+	"AUTH_PUBLIC_KEY": "FILE:$ENV/devel_key_public.pem",
+	"AUTH_ALGORITHM": "RS512",
 	"AUTH_ACCESS_TOKEN_EXPIRE_MINUTES": 30 
 }
 

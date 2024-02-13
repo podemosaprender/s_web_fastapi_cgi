@@ -10,8 +10,11 @@ from util.cfg import cfg_for
 
 # to get a string like this run:
 # openssl rand -hex 32
-SECRET_KEY = cfg_for("AUTH_SECRET_KEY")
-ALGORITHM = cfg_for("AUTH_ALGORITHM")
+ALGORITHM = cfg_for("AUTH_ALGORITHM","RSA")
+
+SECRET_KEY = cfg_for("AUTH_SECRET_KEY", read_file=True)
+PUBLIC_KEY = cfg_for("AUTH_PUBLIC_KEY", SECRET_KEY, read_file=True) #DFLT for symetic algorithms
+
 ACCESS_TOKEN_EXPIRE_MINUTES = cfg_for("AUTH_EXPIRES_MINS",30)
 
 class Token(BaseModel):

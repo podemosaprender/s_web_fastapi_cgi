@@ -58,5 +58,8 @@ SEE: https://sqlmodel.tiangolo.com/tutorial/fastapi/simple-hero-api/
 3. on the terminal write `token=` and paste the token with quotes
 4. on the terminal paste `curl -H "Authorization: Bearer $token" http://localhost:8000/auth/users/me/`
 
+~~~
+openssl genrsa -out devel_key_private.pem 4096
+openssl rsa -in devel_key_private.pem -pubout -out ../devel_key_public.pem
+~~~
 
-sqlite> insert into user (username, hashed_password) values('johndoe','$2b$12$WVU7gQ2RqBp7I9BQB1e5gO06MnRstY3ybUyWhH/iVv4zd9zPRh3KG');

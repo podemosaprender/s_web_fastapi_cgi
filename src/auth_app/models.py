@@ -4,9 +4,12 @@ from sqlmodel import SQLModel, Field, Column, String, select
 from util.db_cx_async import save_instance
 from sqlalchemy.exc import NoResultFound
 
+from datetime import datetime
+
 class User(SQLModel): 
 	username: str = Field(default=None, primary_key=True)
 	email: str | None = None
+	created_at: datetime = Field( default_factory=datetime.utcnow, )
 	full_name: str | None = None
 	disabled: bool | None = None
 
@@ -23,10 +26,6 @@ def get_password_hash(password): #U: console/admin only
 def verify_password(plain_password, hashed_password):
 	return pwd_context.verify(plain_password, hashed_password)
 
-EMU_PASS = get_password_hash('xtestuser secreto'); #XXX:EMU
-#TEST: 
-print(EMU_PASS)
-
 async def get_user(username: str, db_session):
 	res= await db_session.exec(
 		select(UserInDB).where(UserInDB.username == username)
@@ -41,15 +40,22 @@ async def authenticate_user(username: str, password: str, db_session):
 		return False
 	return user
 
-async def set_user_password(user: User, new_password: str, wantsCreate: False, db_session): #U: set pass, create if needed #SEC: don't expose to UI without validation!
+async def update_user(username: str, new_values: dict, new_password: str, wantsCreate: False, db_session): #U: set pass, create if needed #SEC: don't expose to UI without validation!
 	thisUserInDb= None #DFLT
 	try:
-		thisUserInDb= await get_user(user.username, db_session)
+		thisUserInDb= await get_user(username, db_session)
 	except NoResultFound as ex:
 		if not wantsCreate:
 			raise ex
 		else:
-			thisUserInDb= UserInDB(**user.dict())
+			thisUserInDb= UserInDB(username=username)
 
-	thisUserInDb.hashed_password= get_password_hash(f"{user.username} {new_password}")
+	for (k,v) in new_values.items():
+		setattr(thisUserInDb, k, v)
+
+	if not new_password is None:
+		thisUserInDb.hashed_password= get_password_hash(f"{username} {new_password}")
+
 	await save_instance(thisUserInDb, db_session)
+	await db_session.refresh(thisUserInDb)
+	return thisUserInDb
