@@ -53,13 +53,20 @@ SEE: https://sqlmodel.tiangolo.com/tutorial/fastapi/simple-hero-api/
 
 ## Auth JWT
 
-1. Get token with johndoe / secreto in http://127.0.0.1:8000/docs#/default/login_for_access_token_auth_token_post
+Create / update users
+~~~
+(cd src; python -m auth_app.cmd user-update --password secreto xuser1)
+~~~
+
+1. Get token with xuser1 / secreto in http://127.0.0.1:8000/docs#/default/login_for_access_token_auth_token_post
 2. copy the token with quotes 
 3. on the terminal write `token=` and paste the token with quotes
 4. on the terminal paste `curl -H "Authorization: Bearer $token" http://localhost:8000/auth/users/me/`
 
+### Generate your keys
+
 ~~~
 openssl genrsa -out devel_key_private.pem 4096
-openssl rsa -in devel_key_private.pem -pubout -out ../devel_key_public.pem
+openssl rsa -in devel_key_private.pem -pubout -out devel_key_public.pem
 ~~~
 
