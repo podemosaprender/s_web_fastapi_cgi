@@ -66,7 +66,8 @@ Create / update users
 ### Generate your keys
 
 ~~~
-openssl genrsa -out devel_key_private.pem 4096
-openssl rsa -in devel_key_private.pem -pubout -out devel_key_public.pem
+KEY=devel
+openssl genrsa -out ${KEY}_key_private.pem 4096
+openssl rsa -in ${KEY}_key_private.pem -pubout -out ${KEY}_key_public.pem
 ~~~
 
