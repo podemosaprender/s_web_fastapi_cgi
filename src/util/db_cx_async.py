@@ -11,6 +11,7 @@ sqlite_file_name = cfg_for("DB_SQLITE_PATH","database.db") #A: if DB_URL not def
 db_url = cfg_for("DB_URL", f"sqlite+aiosqlite:///{sqlite_file_name}")
 logm("DB init connecting to", db_url=db_url)
 engine= AsyncEngine( create_engine(db_url, echo=False, future=True) )
+session_async= sessionmaker( engine, class_=AsyncSession, expire_on_commit=False)
 
 async def db_init() -> None:
 	async with engine.begin() as conn:
@@ -18,11 +19,8 @@ async def db_init() -> None:
 		logm("db_init DONE")
 
 async def db_session() -> AsyncSession:
-    async_session = sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
-    async with async_session() as session:
-        yield session
+	async with session_async() as session:
+		yield session
 
 async def save_instance(instance, session):
 	session.add(instance)

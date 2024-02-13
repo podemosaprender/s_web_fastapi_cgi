@@ -4,6 +4,7 @@ import sys
 import os
 
 PACKAGES=[
+  'click', #U: command line parameters
 	'fastapi',
 	'sqlmodel',
 	'pydantic',
