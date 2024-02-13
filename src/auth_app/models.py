@@ -1,14 +1,17 @@
 #FROM: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#advanced-usage-with-scopes
 from passlib.context import CryptContext
-from pydantic import BaseModel
+from sqlmodel import SQLModel, Field, Column, String, select
 
-class User(BaseModel):
-	username: str
+
+class User(SQLModel): 
+	username: str = Field(default=None, primary_key=True)
 	email: str | None = None
 	full_name: str | None = None
 	disabled: bool | None = None
 
-class UserInDB(User):
+class UserInDB(User, table = True): 
+	__tablename__="user"
+
 	hashed_password: str
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -20,23 +23,17 @@ def verify_password(plain_password, hashed_password):
 	return pwd_context.verify(plain_password, hashed_password)
 
 EMU_PASS = get_password_hash('secreto'); #XXX:EMU
-EMU_DB = { #XXX:EMU
-	"johndoe": {
-		"username": "johndoe",
-		"full_name": "John Doe",
-		"email": "johndoe@example.com",
-		"hashed_password": EMU_PASS,
-		"disabled": False,
-	}
-}
+#TEST: print(EMU_PASS)
 
-def get_user(username: str):
-	if username in EMU_DB:
-		user_dict = EMU_DB[username]
-		return UserInDB(**user_dict)
 
-def authenticate_user(username: str, password: str):
-	user = get_user(username)
+async def get_user(username: str, db_session):
+	res= await db_session.exec(
+		select(UserInDB).where(UserInDB.username == username)
+	)
+	return res.one()
+
+async def authenticate_user(username: str, password: str, db_session):
+	user = await get_user(username, db_session)
 	if not user:
 		return False
 	if not verify_password(password, user.hashed_password):

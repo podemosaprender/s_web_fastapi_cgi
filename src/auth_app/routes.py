@@ -5,6 +5,8 @@ from typing import Annotated
 
 from fastapi import Depends, APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlmodel.ext.asyncio.session import AsyncSession
+from util.db_cx_async import db_session, engine, save_instance
 
 from .models import User, authenticate_user
 from .token_no_db import Token, create_access_token
@@ -14,9 +16,10 @@ router= APIRouter(prefix="/auth")
 
 @router.post("/token")
 async def login_for_access_token(
-	form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+	form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+	db_session: AsyncSession = Depends(db_session)
 ) -> Token:
-	user = authenticate_user(form_data.username, form_data.password)
+	user = await authenticate_user(form_data.username, form_data.password, db_session)
 	if not user:
 		raise HTTPException(
 			status_code=status.HTTP_401_UNAUTHORIZED,
