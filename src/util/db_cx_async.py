@@ -11,7 +11,7 @@ from sqlalchemy.exc import NoResultFound
 sqlite_file_name = cfg_for("DB_SQLITE_PATH","database.db") #A: if DB_URL not defined
 db_url = cfg_for("DB_URL", f"sqlite+aiosqlite:///{sqlite_file_name}")
 logm("DB init connecting to", db_url=db_url)
-engine= AsyncEngine( create_engine(db_url, echo=False, future=True) )
+engine= AsyncEngine( create_engine(db_url, echo=(cfg_for("DB_DBG","NO")=="YES"), future=True) )
 session_async= sessionmaker( engine, class_=AsyncSession, expire_on_commit=False)
 
 async def db_init() -> None:

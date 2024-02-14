@@ -1,5 +1,6 @@
 {
 	"NO-DB_URL": "postgresql+asyncpg://postgres:dev_pg_root@localhost/api1",
+	"DB_DBG": "YES",
 	"AUTHORIZED_ORIGINS": [
 		"http://localhost:8000", "http://127.0.0.1:8000",
 		"https://api1.o-o.fyi", "http://api1.o-o.fyi",

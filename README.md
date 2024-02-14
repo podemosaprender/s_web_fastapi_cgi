@@ -63,9 +63,21 @@ Create / update users
 3. on the terminal write `token=` and paste the token with quotes
 4. on the terminal paste `curl -H "Authorization: Bearer $token" http://localhost:8000/auth/users/me/`
 
+to set the variable automatically
+~~~
+token=`curl -X 'POST' 'http://localhost:8000/auth/token' -H 'accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded'  -d 'grant_type=&username=xuser1&password=secreto&scope=&client_id=&client_secret=' | cut '-d"' -f4 ` ; echo $token
+~~~
+
 To create an AuthScope:
 
-curl -X POST -H "Authorization: Bearer $token" -H 'Content-type: application/json'  -d '{"allow_all": false}' "http://localhost:8000/auth/scope/@xuser1/llamada"
+~~~
+curl -X PUT -H "Authorization: Bearer $token" -H 'Content-type: application/json'  -d '{"allow_all": false}' "http://localhost:8000/auth/scope/@xuser1/llamada"
+~~~
+
+add or remove users, idempotent, may be created in the same operation
+~~~
+curl -X PUT -H "Authorization: Bearer $token" -H 'Content-type: application/json'  -d '{"allow_all": false, "users_add": ["ana","mariana","jose"], "users_remove": ["pepe","maria"]}' "http://localhost:8000/auth/scope/@xuser1/llamada3"
+~~~
 
 ### Generate your keys
 

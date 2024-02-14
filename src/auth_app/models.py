@@ -1,10 +1,10 @@
 #FROM: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#advanced-usage-with-scopes
 from typing import Optional
 from passlib.context import CryptContext
-from sqlmodel import SQLModel, Field, Column, String, select
+from sqlmodel import SQLModel, Field, Column, String, select, delete
 from util.db_cx_async import db_find, db_save, db_update
 from sqlalchemy import UniqueConstraint, PrimaryKeyConstraint
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
 
 from datetime import datetime
 
@@ -28,7 +28,7 @@ class AuthScope(SQLModel, table= True): #U: ej. @mauri/miservidorcito
 	name: str = Field(default=None)
 	allow_all: bool
 
-class AuthScopeUsers(SQLModel, table= True): #U: which users are allowed which scopes
+class AuthScopeUser(SQLModel, table= True): #U: which users are allowed which scopes
 	__table_args__ = (PrimaryKeyConstraint("authscope_id","username"),)
 	created_at: datetime = Field( default_factory=datetime.utcnow, )
 	authscope_id: Optional[int] = Field(default=None, foreign_key="authscope.id")
@@ -59,7 +59,37 @@ async def update_user(username: str, new_values: dict, new_password: str, wantsC
 	thisUserInDb.hashed_password= get_password_hash(f"{username} {new_password}")
 	return await db_save(thisUserInDb, db_session)
 
-async def update_scope(active_user: UserInDB, scope_name: str, allow_all: bool, db_session, wantsCreate: False): 
+async def update_scope(active_user: UserInDB, scope_name: str, allow_all: bool, db_session, users_add: [], users_remove: [], wantsCreate: False): 
 	if (scope_name.startswith( '@'+active_user.username+'/' )):
-		return await db_update(AuthScope, dict(name=scope_name), dict(allow_all=allow_all), db_session, wantsCreate=True, wantsSave=True)
+		scope= await db_update(AuthScope, dict(name=scope_name), dict(allow_all=allow_all), db_session, wantsCreate=True, wantsSave=True)
+
+		if len(users_remove)>0 :
+			print("RMX",users_remove)
+			await db_session.exec( 
+					delete( AuthScopeUser )
+						.where( AuthScopeUser.authscope_id == scope.id )
+						.where( AuthScopeUser.username.in_( users_remove ) )
+			)
+
+
+		existing= ( await db_session.exec( 
+				select( AuthScopeUser.username )
+					.where( AuthScopeUser.authscope_id == scope.id )
+					.where( AuthScopeUser.username.in_( users_add ) )
+			)).all()
+
+		for uname in users_add:
+			if not uname in existing:
+				try:
+					asu= AuthScopeUser(authscope_id= scope.id, username=uname)
+					await db_save(asu, db_session)
+				except IntegrityError:
+					pass #A: already in db, OK
+				except Exception as ex:
+					print(type(ex), ex)	
+		
+		await db_session.commit()
+
+		return scope
+
 	raise Exception("Unauthorized scope name")
