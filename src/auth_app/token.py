@@ -8,6 +8,17 @@ from .token_no_db import get_token_data, oauth2_scheme
 from .models import User, get_user
 
 #S: validate
+async def get_token_data_web(
+	token: Annotated[str, Depends(oauth2_scheme)],
+):
+	credentials_exception = HTTPException(
+		status_code=status.HTTP_401_UNAUTHORIZED,
+		detail="Could not validate credentials",
+		headers={"WWW-Authenticate": "Bearer"},
+	)
+	token_data= await get_token_data(token)
+	return token_data
+
 async def get_current_user(
 	token: Annotated[str, Depends(oauth2_scheme)],
 	db_session: AsyncSession = Depends(db_session)

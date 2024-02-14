@@ -1,5 +1,5 @@
 #FROM: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#advanced-usage-with-scopes
-from typing import Optional
+from typing import Optional, List
 from passlib.context import CryptContext
 from sqlmodel import SQLModel, Field, Column, String, select, delete
 from util.db_cx_async import db_find, db_save, db_update
@@ -60,36 +60,46 @@ async def update_user(username: str, new_values: dict, new_password: str, wantsC
 	return await db_save(thisUserInDb, db_session)
 
 async def update_scope(active_user: UserInDB, scope_name: str, allow_all: bool, db_session, users_add: [], users_remove: [], wantsCreate: False): 
-	if (scope_name.startswith( '@'+active_user.username+'/' )):
+	#A: we are in a transaction, nothing will be saved until we commit
+
+	if (scope_name.startswith( '@'+active_user.username+'/' )): #A: active user is allowed to edit this scope
 		scope= await db_update(AuthScope, dict(name=scope_name), dict(allow_all=allow_all), db_session, wantsCreate=True, wantsSave=True)
 
 		if len(users_remove)>0 :
-			print("RMX",users_remove)
 			await db_session.exec( 
 					delete( AuthScopeUser )
 						.where( AuthScopeUser.authscope_id == scope.id )
 						.where( AuthScopeUser.username.in_( users_remove ) )
 			)
-
+		#A: we removed usernames in the users_remove list
 
 		existing= ( await db_session.exec( 
 				select( AuthScopeUser.username )
 					.where( AuthScopeUser.authscope_id == scope.id )
 					.where( AuthScopeUser.username.in_( users_add ) )
 			)).all()
+		#A: existing is the list of usernames for this scope already in the db
 
 		for uname in users_add:
 			if not uname in existing:
-				try:
-					asu= AuthScopeUser(authscope_id= scope.id, username=uname)
-					await db_save(asu, db_session)
-				except IntegrityError:
-					pass #A: already in db, OK
-				except Exception as ex:
-					print(type(ex), ex)	
-		
+				asu= AuthScopeUser(authscope_id= scope.id, username=uname)
+				await db_save(asu, db_session)
+		#A: new usernames in users_add were added to this scope
+
 		await db_session.commit()
 
 		return scope
 
 	raise Exception("Unauthorized scope name")
+
+async def validate_scopes_for_token(active_user: UserInDB, scopes: List[str], db_session): 
+	existing= ( await db_session.exec( 
+			select( AuthScope.name )
+				.where( AuthScopeUser.authscope_id == AuthScope.id )
+				.where( AuthScopeUser.username == active_user.username )
+				.where( AuthScope.name.in_( scopes ) )
+		)).all()
+	#A: existing is the list of scopes authorized for this username
+	not_existing= [s for s in scopes if not s in existing ]
+	return existing, not_existing
+

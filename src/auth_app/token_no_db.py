@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from typing import Annotated
+from typing import Annotated, List
 from pydantic import BaseModel
 
 from fastapi import Depends, HTTPException, status
@@ -12,7 +12,7 @@ from util.cfg import cfg_for
 # openssl rand -hex 32
 ALGORITHM = cfg_for("AUTH_ALGORITHM","RSA")
 
-SECRET_KEY = cfg_for("AUTH_SECRET_KEY", read_file=True)
+SECRET_KEY = cfg_for("AUTH_SECRET_KEY", "", read_file=True)
 PUBLIC_KEY = cfg_for("AUTH_PUBLIC_KEY", SECRET_KEY, read_file=True) #DFLT for symetic algorithms
 
 ACCESS_TOKEN_EXPIRE_MINUTES = cfg_for("AUTH_EXPIRES_MINS",30)
@@ -23,6 +23,8 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
 	username: str | None = None
+	scopes: List[str]
+	payload: dict
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
 	to_encode = data.copy()
@@ -43,11 +45,12 @@ async def get_token_data(token: Annotated[str, Depends(oauth2_scheme)]):
 		headers={"WWW-Authenticate": "Bearer"},
 	)
 	try:
-		payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+		payload = jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM])
 		username: str = payload.get("sub")
 		if username is None:
 			raise credentials_exception
-		token_data = TokenData(username=username)
+
+		token_data = TokenData(username=username, scopes= payload.get('scope',[]), payload= payload)
 	except JWTError:
 		raise credentials_exception
 

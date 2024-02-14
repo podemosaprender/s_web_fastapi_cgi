@@ -68,6 +68,11 @@ to set the variable automatically
 token=`curl -X 'POST' 'http://localhost:8000/auth/token' -H 'accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded'  -d 'grant_type=&username=xuser1&password=secreto&scope=&client_id=&client_secret=' | cut '-d"' -f4 ` ; echo $token
 ~~~
 
+Check it
+~~~
+curl -X GET -H "Authorization: Bearer $token" -H 'Content-type: application/json'  "http://localhost:8000/auth/token/data/"
+~~~
+
 To create an AuthScope:
 
 ~~~
