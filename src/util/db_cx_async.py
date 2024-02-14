@@ -30,7 +30,7 @@ async def db_save(instance, db_session):
 	return instance
 
 async def save_instance(instance, session): #DEPRECATED, use db_sabe
-	return db_save(instance, session)
+	return await db_save(instance, session)
 
 async def db_find(cls, kv: dict, db_session, wantsCreate= False):
 	inDb= None	
