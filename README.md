@@ -63,6 +63,10 @@ Create / update users
 3. on the terminal write `token=` and paste the token with quotes
 4. on the terminal paste `curl -H "Authorization: Bearer $token" http://localhost:8000/auth/users/me/`
 
+To create an AuthScope:
+
+curl -X POST -H "Authorization: Bearer $token" -H 'Content-type: application/json'  -d '{"allow_all": false}' "http://localhost:8000/auth/scope/@xuser1/llamada"
+
 ### Generate your keys
 
 ~~~
@@ -71,3 +75,6 @@ openssl genrsa -out ${KEY}_key_private.pem 4096
 openssl rsa -in ${KEY}_key_private.pem -pubout -out ${KEY}_key_public.pem
 ~~~
 
+## SEE ALSO:
+
+https://www.starlette.io/routing/#path-parameters
