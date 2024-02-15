@@ -1,87 +1,41 @@
-from form_app.models import AnyForm, Entities, keys_for_validator
-from util.db_cx_async import db_session, engine, save_instance
-from util.cfg import cfg_for
-from util.csviter import CSVIter
-from util.logging import logm
+import json
+import re
 
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi.responses import RedirectResponse, StreamingResponse, HTMLResponse
 
-import json
-import re
+from util.logging import logm
+from util.db_cx_async import db_session, engine, save_instance
+from util.db_cx_async import db_expand_moredata,db_expand_moredata_cols, db_read_any
+from util.fastapi import DbSessionT, RefererAuthorizedT
+from form_app.models import AnyForm, Entities, keys_for_validator
 
 router= APIRouter()
-AUTHORIZED_ORIGINS = cfg_for("AUTHORIZED_ORIGINS",[])
-
-async def read_any(a_select, fmt: str, db_session: AsyncSession, mapf= None, mapf_data= None, columns= None):
-		if (fmt=="csv"):
-			async with engine.begin() as cx:
-				results = await cx.execute(a_select) #A: not typed
-				columns= results.keys() if columns is None else columns
-
-				return StreamingResponse( CSVIter(results, mapf= mapf, mapf_data= mapf_data, columns=columns), media_type="text/csv" )
-		else:
-			results = await db_session.exec(a_select) #A: typed!
-			return results.all()
-
-def expand_moredata(kv_or_arr, columns, more_data_idx):
-	if type(kv_or_arr)==dict:
-		if 'more_data' in kv:
-			kv={ **kv, **json.loads(kv['more_data']) }
-			kv.pop('more_data',None)
-		return kv	
-	else:
-		try:
-			json_str= kv_or_arr[more_data_idx]
-			return list(kv_or_arr[:more_data_idx])+list(kv_or_arr[(more_data_idx+1):])+list(json.loads(json_str).values())
-		except Exception as ex:
-			logm("expand_moredata",columns=columns,ex=ex)
-			pass
-
-	return kv_or_arr #DFTL, unchanged
-
-def expand_moredata_cols(columns, expanded):
-	idx= list(columns).index('more_data')
-	return list(columns[:idx])+list(columns[(idx+1):])+list(expanded), idx
 
 @router.get("/data/")
-async def read_data(fmt: str="json", entity: str="any", db_session: AsyncSession = Depends(db_session)):
+async def read_data(db_session: DbSessionT, fmt: str="json", entity: str="any"):
 	columns= None #DFLT
 	more_data_idx= None
 	a_select= select(AnyForm) #DFLT
 	entity_cls= Entities.get(entity,None)
 	if not entity_cls is None:
-		(columns, more_data_idx)= expand_moredata_cols(keys_for_validator(AnyForm), keys_for_validator(entity_cls))
+		(columns, more_data_idx)= db_expand_moredata_cols(keys_for_validator(AnyForm), keys_for_validator(entity_cls))
 		a_select= a_select.where(AnyForm.entity	== entity)
 
 	logm("read_data",entity_cls=entity_cls,columns=columns)
-	return await read_any(a_select, fmt, db_session, mapf= expand_moredata, mapf_data= more_data_idx, columns=columns)
+	return await db_read_any(a_select, fmt, db_session, mapf= db_expand_moredata, mapf_data= more_data_idx, columns=columns)
 
 #SEE: https://stackoverflow.com/questions/74009210/how-to-create-a-fastapi-endpoint-that-can-accept-either-form-or-json-body
 #SEE: https://fastapi.tiangolo.com/advanced/using-request-directly/
 #SEE: https://www.starlette.io/requests/
 @router.post("/asform/")
-async def save_asform(req: Request, db_session: AsyncSession = Depends(db_session)):
+async def save_asform(req: Request, referer_data: RefererAuthorizedT, db_session: DbSessionT):
 	error_msg= 'unknown' #DFLT fail
 	dont_redirect= False #DFLT redirect
 	url_mal= "/"
 	try:
-		#XXX:LIB as middleware? {
-		#XXX:USE https://fastapi.tiangolo.com/tutorial/header-params/ ?
-		referer = req.headers.get('referer','')
-		#DBG: print("referer", referer);
-		is_authorized= False #DFLT
-		referer_host= 'NO_HOST'
-		referer_host_match = re.match(r'(https?://([^/]+))', referer)
-		if not referer_host_match is None:
-			referer_hostfull = referer_host_match.group(1)
-			referer_host= referer_host_match.group(2)
-			is_authorized= referer_hostfull in AUTHORIZED_ORIGINS
-		#XXX:LIB as middleware? }
-
-		#DBG: print(f"referer isAuthorized={is_authorized} {referer_host} {referer}")
 		form= await req.form()
 		dont_redirect= form.get('o-o-form-dont-redirect',False) 
 		url_bien = form.get("o-o-form-url-ok","/static/si_salio_bien.html")
@@ -101,7 +55,7 @@ async def save_asform(req: Request, db_session: AsyncSession = Depends(db_sessio
 			#A: si algo estaba mal lanzo excepcion, OjO! validar bien todos los inputs con tipos o a mano
 			await save_instance(
 				AnyForm( 
-					site= referer_host, referer= referer, 
+					site= referer_host, referer= referer_data.referer_host, 
 					entity= entity_name,
 					more_data= json.dumps(data),
 				), 
@@ -113,9 +67,8 @@ async def save_asform(req: Request, db_session: AsyncSession = Depends(db_sessio
 			return RedirectResponse(url_bien,status_code=303) #A: 303=see other, GET
 
 	except Exception as ex:
-		print(ex)
+		#DBG: print(ex)
 		error_msg= str(ex)
-
 	#A: something went wrong
 	if dont_redirect: 
 		return HTMLResponse("error "+error_msg)

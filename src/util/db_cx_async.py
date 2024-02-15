@@ -7,6 +7,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import NoResultFound
+from util.csviter import CSVIter
 
 sqlite_file_name = cfg_for("DB_SQLITE_PATH","database.db") #A: if DB_URL not defined
 db_url = cfg_for("DB_URL", f"sqlite+aiosqlite:///{sqlite_file_name}")
@@ -55,3 +56,34 @@ async def db_update(cls, key_kv: dict, new_values_kv: dict, db_session, wantsCre
 		return await db_save(inDb, db_session)
 
 	return inDb
+
+async def db_read_any(a_select, fmt: str, db_session: AsyncSession, mapf= None, mapf_data= None, columns= None):
+		if (fmt=="csv"):
+			async with engine.begin() as cx:
+				results = await cx.execute(a_select) #A: not typed
+				columns= results.keys() if columns is None else columns
+
+				return StreamingResponse( CSVIter(results, mapf= mapf, mapf_data= mapf_data, columns=columns), media_type="text/csv" )
+		else:
+			results = await db_session.exec(a_select) #A: typed!
+			return results.all()
+
+def db_expand_moredata(kv_or_arr, columns, more_data_idx):
+	if type(kv_or_arr)==dict:
+		if 'more_data' in kv:
+			kv={ **kv, **json.loads(kv['more_data']) }
+			kv.pop('more_data',None)
+		return kv	
+	else:
+		try:
+			json_str= kv_or_arr[more_data_idx]
+			return list(kv_or_arr[:more_data_idx])+list(kv_or_arr[(more_data_idx+1):])+list(json.loads(json_str).values())
+		except Exception as ex:
+			logm("expand_moredata",columns=columns,ex=ex)
+			pass
+
+	return kv_or_arr #DFTL, unchanged
+
+def db_expand_moredata_cols(columns, expanded):
+	idx= list(columns).index('more_data')
+	return list(columns[:idx])+list(columns[(idx+1):])+list(expanded), idx
