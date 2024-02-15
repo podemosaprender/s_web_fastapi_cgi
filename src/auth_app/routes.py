@@ -5,12 +5,13 @@ from typing import Annotated, Optional, List
 from typing_extensions import Doc
 import json
 
-from fastapi import Depends, Form, Body, APIRouter, HTTPException, status
+from fastapi import Depends, Form, Body, Header, APIRouter, HTTPException, status
+from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.exc import NoResultFound
 from util.db_cx_async import db_session
-from util.fastapi import DbSessionT
+from util.fastapi import DbSessionT, RefererT
 
 from .models import User, authenticate_user, update_scope, AuthScope, validate_scopes_for_token
 from .token_no_db import Token, TokenData, TokenDataT, token_create, HTTPExceptionUnauthorized
@@ -23,6 +24,7 @@ async def login_for_access_token(
 	form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 	db_session: DbSessionT,
 	extra: Annotated[Optional[str], Form()]= None,
+	referer: RefererT= None,
 ) -> Token:
 	user = await authenticate_user(form_data.username, form_data.password, db_session)
 	if not user:
@@ -45,7 +47,11 @@ async def login_for_access_token(
 	extra_dict['scope']= extra_dict.get('scope',[])+ scopes_not_auth
 
 	access_token = token_create( data={"sub": user.username,"scope": scopes_auth, "not_auth": extra_dict} )
-	return Token(access_token=access_token, token_type="bearer")
+
+	if form_data.grant_type=="password":
+		return Token(access_token=access_token, token_type="bearer")
+	else:
+		return RedirectResponse(url='http://mauriciocap.com/?code=123456780aa', status_code=status.HTTP_307_TEMPORARY_REDIRECT) #XXX:use redirect_uri from request, filter by client_id, etc.
 
 @router.get("/token/data/")
 async def read_token_data(

@@ -41,7 +41,7 @@ TokenT= Annotated[str, Depends(Oauth2Scheme)] #U: def mifun(token: TokenT): ...
 
 class HTTPExceptionUnauthorized(HTTPException):
 	def __init__(self, **kwargs):
-		super(
+		super(HTTPExceptionUnauthorized, self).__init__(
 			status_code=status.HTTP_401_UNAUTHORIZED,
 			detail="Could not validate credentials",
 			headers={"WWW-Authenticate": "Bearer"},

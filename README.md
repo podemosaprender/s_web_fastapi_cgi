@@ -65,7 +65,7 @@ Create / update users
 
 to set the variable automatically
 ~~~
-token=`curl -X 'POST' 'http://localhost:8000/auth/token' -H 'accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded'  -d 'grant_type=&username=xuser1&password=secreto&scope=&client_id=&client_secret=' | cut '-d"' -f4 ` ; echo $token
+token=`curl -X 'POST' 'http://localhost:8000/auth/token' -H 'accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded'  -d 'grant_type=password&username=xuser1&password=secreto&scope=&client_id=&client_secret=' | cut '-d"' -f4 ` ; echo $token
 ~~~
 
 Check it
@@ -87,7 +87,7 @@ curl -X PUT -H "Authorization: Bearer $token" -H 'Content-type: application/json
 ### Generate token with scopes and extra data
 
 ~~~
-token=`curl -X 'POST' 'http://localhost:8000/auth/token' -H 'accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded'  -d 'grant_type=&username=xuser1&password=secreto&scope=@xuser2/b2+scp2&client_id=&client_secret=&extra={"hola": "mau"}' | cut '-d"' -f4 ` ; echo $token | wc -c
+token=`curl -X 'POST' 'http://localhost:8000/auth/token' -H 'accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded'  -d 'grant_type=password&username=xuser1&password=secreto&scope=@xuser2/b2+scp2&client_id=&client_secret=&extra={"hola": "mau"}' | cut '-d"' -f4 ` ; echo $token | wc -c
 ~~~
 
 check what's included in your jwt / available to the receiving application. **NOTICE** there is a `not_auth` key for everything the API can't validate, and **must be treated ONLY as user entered info**
