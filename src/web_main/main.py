@@ -31,12 +31,31 @@ AUTHORIZED_ORIGINS = cfg_for("AUTHORIZED_ORIGINS", [
 ])
 
 #S: CORS {
+#SEE: https://github.com/encode/starlette/blob/master/starlette/middleware/cors.py
+#SEE: https://fastapi.tiangolo.com/advanced/middleware/
+class MiddlewarePostFromAny():
+	def __init__(self, app):
+		self.app= app
+		self.corsPostFromAny= CORSMiddleware(
+			app, allow_origins=["*"], allow_methods=["POST"] #A:SEC url checked below
+		)
+		self.corsDefault= CORSMiddleware(
+			app, allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
+			allow_origins= AUTHORIZED_ORIGINS, 
+		)
+
+	async def __call__(self,scope,receive,send):
+		if scope['type']!='http':
+			await self.app(scope, receive, send)
+			return 
+
+		if scope['path']== '/auth/token/claim':
+			return await self.corsPostFromAny(scope,receive,send)
+		else:
+			return await self.corsDefault(scope,receive,send)
+	
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins= AUTHORIZED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+	MiddlewarePostFromAny #A:SEC allow any for token claim, but RESTRICT for everything else
 )
 #S: CORS }
 
