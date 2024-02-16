@@ -5,31 +5,43 @@ import json
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-class TestLogin():
-  def setup_method(self, method):
-    self.driver = webdriver.Firefox()
-    self.vars = {}
-  
-  def teardown_method(self, method):
-    self.driver.quit()
-  
-  def test_login(self):
-    self.driver.get("http://localhost:8000/auth/login?code=10&scope=uno+@diego/dos&state=con%20espacio")
-    self.driver.find_element(By.NAME, "username").click()
-    self.driver.find_element(By.NAME, "username").send_keys("xuser1")
-    self.driver.find_element(By.NAME, "password").send_keys("secreto")
-    assert self.driver.find_element(By.CSS_SELECTOR, "div:nth-child(8) > label").text == "uno"
-    assert self.driver.find_element(By.CSS_SELECTOR, "div:nth-child(9) > label").text == "@diego/dos"
-    self.driver.find_element(By.NAME, "scope_extra").click()
-    self.driver.find_element(By.NAME, "scope_extra").send_keys("otromas")
-    self.driver.find_element(By.NAME, "redirect_uri").click()
-    self.driver.find_element(By.NAME, "redirect_uri").send_keys("http://mauriciocap.com")
-    self.driver.find_element(By.CSS_SELECTOR, "input:nth-child(19)").click()
-    self.driver.implicitly_wait(30)
-    assert self.driver.find_element(By.LINK_TEXT, "Agilidad Empresarial").text == "Agilidad Empresarial"
-  
+class TestX():
+	def setup_method(self, method):
+		self.driver = webdriver.Firefox()
+		self.vars = {}
+	
+	def teardown_method(self, method):
+		self.driver.quit()
+	
+	def test_login(self):
+		# Step # | name | target | value
+		# 1 | open | /static/login_test.html | 
+		self.driver.get("http://localhost:8000/static/login_test.html")
+		self.driver.find_element(By.LINK_TEXT,"scopes and extra data").click()
+		self.driver.find_element(By.NAME, "username").send_keys("xuser1")
+		self.driver.find_element(By.NAME, "password").send_keys("secreto")
+		# 7 | assertText | css=div:nth-child(8) > label | @xuser2/b2
+		assert self.driver.find_element(By.CSS_SELECTOR, "div:nth-child(8) > label").text == "@xuser2/b2"
+		# 13 | assertText | css=div:nth-child(9) > label | miScopeInventado
+		assert self.driver.find_element(By.CSS_SELECTOR, "div:nth-child(9) > label").text == "miScopeInventado"
+		# 16 | type | name=scope_extra | otro/nuevo
+		self.driver.find_element(By.NAME, "scope_extra").send_keys("otro/nuevo")
+		# 21 | assertValue | name=extra_data | {\n	"some_url": "http://podemosaprender.org",\n	"an_array": [\n		10,\n		20,\n		30\n	]\n}
+		value = self.driver.find_element(By.NAME, "extra_data").get_attribute("value")
+		assert value == "{\n  \"some_url\": \"http://podemosaprender.org\",\n  \"an_array\": [\n    10,\n    20,\n    30\n  ]\n}"
+		# 22 | click | name=action | 
+		self.driver.find_element(By.NAME, "action").click()
+		# 23 | assertValue | id=result | {\n	"sub": "xuser1",\n	"scope": [\n		"@xuser2/b2"\n	],\n	"not_validated": {\n		"some_url": "http://podemosaprender.org",\n		"an_array": [\n			10,\n			20,\n			30\n		],\n		"scope": [\n			"miScopeInventado",\n			"otro/nuevo"\n		]\n	},\n	"exp": 1708118272\n}
+		WebDriverWait(self.driver,30).until( EC.url_contains("login_test") )
+		WebDriverWait(self.driver,30).until( EC.text_to_be_present_in_element_value(
+			(By.ID, "result"),
+			"{"
+		));
+		value = self.driver.find_element(By.ID, "result").get_attribute("value")
+		assert value.startswith("{\n  \"sub\": \"xuser1\",\n  \"scope\": [\n    \"@xuser2/b2\"\n  ],\n  \"not_validated\": {\n    \"some_url\": \"http://podemosaprender.org\",\n    \"an_array\": [\n      10,\n      20,\n      30\n    ],\n    \"scope\": [\n      \"miScopeInventado\",\n      \"otro/nuevo\"\n    ]\n  },\n");
+	
