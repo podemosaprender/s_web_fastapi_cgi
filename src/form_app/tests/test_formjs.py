@@ -10,23 +10,28 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.support import expected_conditions as EC
+#SEE: https://www.selenium.dev/selenium/docs/api/py/webdriver_support/selenium.webdriver.support.expected_conditions.html
 
 class TestFormjs():
-  def setup_method(self, method):
-    self.driver = webdriver.Firefox()
-    self.vars = {}
-  
-  def teardown_method(self, method):
-    self.driver.quit()
-  
-  def test_formjs(self):
-    self.driver.get("http://localhost:8000/static/form_contacto_js.html")
-    self.driver.find_element(By.ID, "name").click()
-    self.driver.find_element(By.ID, "name").send_keys("x1test")
-    self.driver.find_element(By.ID, "email").send_keys("x@test.com")
-    self.driver.find_element(By.ID, "subject").send_keys("x 1 subject <bla> ; sql")
-    self.driver.find_element(By.NAME, "message").send_keys("x1 body\\n<pre>\\n;\\nselect\\n                                       space")
-    self.driver.find_element(By.CSS_SELECTOR, "button").click()
-    self.driver.implicitly_wait(10)
-    assert self.driver.find_element(By.CSS_SELECTOR, ".sent-message").text == "Your message has been sent. Thank you!"
-  
+	def setup_method(self, method):
+		self.driver = webdriver.Firefox()
+		self.vars = {}
+	
+	def teardown_method(self, method):
+		self.driver.quit()
+	
+	def test_formjs(self):
+		self.driver.get("http://localhost:8000/static/form_contacto_js.html")
+		self.driver.find_element(By.ID, "name").click()
+		self.driver.find_element(By.ID, "name").send_keys("x1test")
+		self.driver.find_element(By.ID, "email").send_keys("x@test.com")
+		self.driver.find_element(By.ID, "subject").send_keys("x 1 subject <bla> ; sql")
+		self.driver.find_element(By.NAME, "message").send_keys("x1 body\\n<pre>\\n;\\nselect\\n																			 space")
+		self.driver.find_element(By.CSS_SELECTOR, "button").click()
+		WebDriverWait(self.driver, 30,
+			EC.text_to_be_present_in_element((By.CSS_SELECTOR, ".sent-message"),
+				"Your message has been sent. Thank you!"
+			)
+		)
+	
