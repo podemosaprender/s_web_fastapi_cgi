@@ -105,6 +105,27 @@ openssl genrsa -out ${KEY}_key_private.pem 4096
 openssl rsa -in ${KEY}_key_private.pem -pubout -out ${KEY}_key_public.pem
 ~~~
 
+## TETS
+
+Most tests are generated with SeleniumIDE plugin in the browser, open and edit `./tests/api1.side`
+
+Then exported and edited as needed to a `tests` folder for each app. To run automatically use
+
+~~~
+pip install selenium pytest
+~~~
+
+then
+~~~
+pytest
+~~~
+
+to filter tests
+~~~
+pytest -k login
+pytest --pyargs form_app
+~~~
+
 ## SEE ALSO:
 
 https://www.starlette.io/routing/#path-parameters

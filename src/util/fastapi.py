@@ -1,5 +1,6 @@
 from typing import Annotated
 import urllib
+import re
 
 
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -29,13 +30,13 @@ def referer_data(referer: RefererT) -> RefererData:
 	if not referer_host_match is None:
 		r.referer_hostfull = referer_host_match.group(1)
 		r.referer_host= referer_host_match.group(2)
-		r.is_authorized= referer_hostfull in AUTHORIZED_ORIGINS
+		r.is_authorized= r.referer_hostfull in AUTHORIZED_ORIGINS
 
 	#DBG: print(f"referer isAuthorized={is_authorized} {referer_host} {referer}")
 	return r
 
 def referer_authorized(referer: RefererT):
-	r= referer_data(t)
+	r= referer_data(referer)
 	if not r.is_authorized:
 		raise HTTPException(
 			status= status.HTTP_401_UNAUTHORIZED

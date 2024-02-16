@@ -43,7 +43,7 @@ async def save_asform(req: Request, referer_data: RefererAuthorizedT, db_session
 		entity_name = form.get('o-o-form-entity','any') #XXX:include in authorization?
 		#DBG: print("dont_redirect", dont_redirect)
 
-		if is_authorized: 
+		if referer_data.is_authorized: 
 			validator= Entities.get(entity_name, None)
 			if not validator is None:
 				data= { k: form.get(k, None) for k in keys_for_validator(validator) }
@@ -55,7 +55,7 @@ async def save_asform(req: Request, referer_data: RefererAuthorizedT, db_session
 			#A: si algo estaba mal lanzo excepcion, OjO! validar bien todos los inputs con tipos o a mano
 			await save_instance(
 				AnyForm( 
-					site= referer_host, referer= referer_data.referer_host, 
+					site= referer_data.referer_host, referer= referer_data.referer_host, 
 					entity= entity_name,
 					more_data= json.dumps(data),
 				), 
