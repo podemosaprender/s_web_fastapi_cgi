@@ -1,0 +1,44 @@
+<script src=" https://cdn.jsdelivr.net/npm/jwt-decode@4.0.0/build/cjs/index.min.js "></script>
+<script src="//unpkg.com/alpinejs" defer></script>
+<form x-data="login" action="/auth/token" method="POST">
+	<h1>Login</h1>
+	<input name="username" placeholder="user" /><br/>
+	<input name="password" type="password" placeholder="password" /><br/>
+	<h2>Permissions</h2>
+  <template x-for="scope in scopesInitial">
+		<div>
+			<input type="checkbox" name="scopeEdited" x-bind:id="scope" x-bind:value="scope" x-model="scopes"/>
+			<label x-bind:for="scope" x-text="scope"/>
+		</div>
+  </template>
+	<br/>
+	<b>Add more permissions</b><br/>
+	<textarea name="scope_extra" x-model="scopes_extra"></textarea><br/><br/>
+	<div>
+		Your authorization will be used by <br/>
+		<input name="redirect_uri" x-model="redirect_uri"/> <a x-bind:href="redirect_uri" target="_blank">check before</a>
+	</div>
+	<input type="hidden" name="scope" x-model="scopeFinal" />
+	<input type="hidden" name="tk" x-model="tk" />
+	<input type="submit" value="login"/><br/>
+</form>
+<script>
+	document.addEventListener('alpine:init', () => {
+		tk= document.location.search.slice(4)
+		data= jwtDecode(tk);
+		scopesInitial= (data.scope||'').split(/\s+/);
+		Alpine.data('login', () => ({
+			...data,
+			tk,
+			scopesInitial,
+			scopes: scopesInitial,
+			scopes_extra: '',
+			get scopeFinal() {
+				let s= (this.scopes.join(' ')+' '+this.scopes_extra).replace(/[\n\s]+/,' ')
+				console.log("scopeFinal",s);
+				return s;
+			},
+			redirect_uri: data.redirect_uri || data.referer,
+		}))
+	})
+</script>

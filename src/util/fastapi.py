@@ -1,8 +1,14 @@
 from typing import Annotated
+import urllib
+
+
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import Depends, Form, Body, Header, HTTPException, status
 from util.cfg import cfg_for
 from util.db_cx_async import db_session
+
+def enc_uri(s):
+	return urllib.parse.quote_plus(s)
 
 DbSessionT= Annotated[AsyncSession, Depends(db_session)]
 RefererT= Annotated[str | None, Header()]
@@ -38,3 +44,5 @@ def referer_authorized(referer: RefererT):
 
 RefererDataT= Annotated[RefererData, Depends(referer_data)]
 RefererAuthorizedT= Annotated[RefererData, Depends(referer_authorized)]
+
+HostT= Annotated[str, Header()]

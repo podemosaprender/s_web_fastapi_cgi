@@ -48,14 +48,24 @@ class HTTPExceptionUnauthorized(HTTPException):
 			**kwargs
 		)
 
+def token_data_novalidate_user(token: TokenT):
+	try:
+		print("TK",token)
+		return jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM])
+	except JWTError as ex:
+		print("TK",token)
+		pass #A: handled below	
+
+	raise HTTPExceptionUnauthorized()
+
 async def token_data(token: TokenT):
 	try:
-		payload = jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM])
+		payload = token_data_novalidate_user(token)
 		username: str = payload.get("sub")
 		if not username is None:
 			return TokenData(username=username, scopes= payload.get('scope',[]), payload= payload)
-	except JWTError:
-		pass
+	except JWTError as ex:
+		pass #A: handled below
 
 	raise HTTPExceptionUnauthorized()
 

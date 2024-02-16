@@ -1,12 +1,14 @@
 #FROM: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#advanced-usage-with-scopes
 from typing import Optional, List
+from datetime import datetime, timedelta
+
+from secrets import token_urlsafe
 from passlib.context import CryptContext
 from sqlmodel import SQLModel, Field, Column, String, select, delete
 from util.db_cx_async import db_find, db_save, db_update
 from sqlalchemy import UniqueConstraint, PrimaryKeyConstraint
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from datetime import datetime
 
 class User(SQLModel): 
 	username: str = Field(default=None, primary_key=True)
@@ -34,8 +36,16 @@ class AuthScopeUser(SQLModel, table= True): #U: which users are allowed which sc
 	authscope_id: Optional[int] = Field(default=None, foreign_key="authscope.id")
 	username: Optional[str] = Field(default=None, foreign_key="user.username")
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+#SEE: https://www.oauth.com/oauth2-servers/pkce/authorization-request/
+class TokenForClaim(SQLModel, table= True): #U: we store tokens for a minute to be claimed with a OAuth code
+	claim_id: str = Field(default= None, primary_key=True)
+	created_at: datetime = Field( default_factory=datetime.utcnow, )
+	token: str
+	pkce_method: Optional[str]
+	pkce_challenge: Optional[str]
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+		
 def get_password_hash(password): #U: console/admin only
 	return pwd_context.hash(password)
 
@@ -102,4 +112,28 @@ async def validate_scopes_for_token(active_user: UserInDB, scopes: List[str], db
 	#A: existing is the list of scopes authorized for this username
 	not_existing= [s for s in scopes if not s in existing ]
 	return existing, not_existing
+
+async def token_for_claim_clean(db_session):
+	await db_session.exec(
+		delete( TokenForClaim )
+			.where( TokenForClaim.created_at < datetime.utcnow() + timedelta(minutes=-1) )
+	)
+
+async def token_for_claim_save(db_session, token, pkce_challenge= None, pkce_method= None):
+	claim_id= token_urlsafe(128)
+	await token_for_claim_clean(db_session) #A: always clean, in case we are being flooded
+	await db_save(TokenForClaim(
+		claim_id=claim_id, 
+		token=token,
+		pkce_challenge=pkce_challenge,
+		pkce_method=pkce_method
+	), db_session)
+	return claim_id	
+
+async def token_for_claim_load(db_session, claim_id, pkce_verifier= None):
+	await token_for_claim_clean(db_session) #A: always clean, in case we are being flooded
+	tk= await db_find(TokenForClaim, dict(claim_id=claim_id), db_session)
+	#XXX:IMPLEMENT pkce
+	return tk.token
+
 
