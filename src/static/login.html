@@ -14,6 +14,8 @@
 	<br/>
 	<b>Add more permissions</b><br/>
 	<textarea name="scope_extra" x-model="scopes_extra"></textarea><br/><br/>
+	<b>Extra data</b><br/>
+	<textarea name="extra_data" x-model="extra_data" style="width: 100%; height: 10rem"></textarea><br/><br/>
 	<div>
 		Your authorization will be used by <br/>
 		<input name="redirect_uri" x-model="redirect_uri"/> <a x-bind:href="redirect_uri" target="_blank">check before</a>
@@ -35,7 +37,6 @@
 			scopes_extra: '',
 			get scopeFinal() {
 				let s= (this.scopes.join(' ')+' '+this.scopes_extra).replace(/[\n\s]+/,' ')
-				console.log("scopeFinal",s);
 				return s;
 			},
 			redirect_uri: data.redirect_uri || data.referer,

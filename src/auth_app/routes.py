@@ -31,10 +31,12 @@ async def login_with_ui(
 	code:  str= '',
 	code_challenge: str= '', #SEE: https://www.oauth.com/oauth2-servers/pkce/authorization-code-exchange/
 	code_challenge_method: str= '',
+	extra_data: str= '',
 ):
 	login_tk= token_create(dict(
 		code=code, state=state, scope=scope, referer= re.sub(r'[\?\#].*','',referer), #A: no search params or anchor
-		code_challenge=code_challenge, code_challenge_method=code_challenge_method
+		code_challenge=code_challenge, code_challenge_method=code_challenge_method,
+		extra_data=extra_data,
 	), timedelta(minutes=3)) #A: a temp token only for the login UI
 	return RedirectResponse(f"http://{host}/static/login.html?tk={login_tk}")
 
@@ -42,7 +44,7 @@ async def login_with_ui(
 async def login_for_access_token(
 	form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 	db_session: DbSessionT,
-	extra: Annotated[Optional[str], Form()]= None,
+	extra_data: Annotated[Optional[str], Form()]= None,
 	referer: RefererT= None,
 	tk: Annotated[Optional[str], Form()]= None, #A: the them token only for the login UI
 	redirect_uri: Annotated[Optional[str], Form()]= '',
@@ -56,15 +58,15 @@ async def login_for_access_token(
 	(scopes_auth, scopes_not_validated)= await validate_scopes_for_token(user, scopes, db_session)
 	
 	extra_dict= {}
-	if not extra is None and len(extra)>0:
+	if not extra_data is None and len(extra_data)>0:
 		try:
-			d= json.loads(extra)
+			d= json.loads(extra_data)
 			if type(d)==dict:
 				extra_dict= d
 			else:
 				extra_dict['data']= d
 		except:
-			extra_dict['data']= extra
+			extra_dict['data']= extra_data
 
 	extra_dict['scope']= extra_dict.get('scope',[])+ scopes_not_validated
 
