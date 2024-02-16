@@ -1,0 +1,30 @@
+<script src=" https://cdn.jsdelivr.net/npm/jwt-decode@4.0.0/build/cjs/index.min.js "></script>
+<h1>Login test</h1>
+<ul>
+	<li><a href="/auth/login/">No params</a></li>
+	<li><a href="/auth/login/?scope=@xuser2/b2+miScopeInventado">scopes</a></li>
+	<li><a href="/auth/login/?state=con+espacio&code_challenge=fefefefe110101010&code_challenge_method=plain">Plain challenge</a></li>
+</ul>
+<textarea id="result" style="width: 100%; height: 30rem">
+</textarea>
+
+<script>
+	async function claimIfHasCode() {
+		params= new URLSearchParams(location.search)
+		if (params.has('code')) {
+			console.log('token: claiming with code');
+			tk= await fetch('/auth/token/claim',{
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify({code: params.get('code')}),
+			}).then(res => res.text())
+			console.log('token: got',tk)
+			tk_data= jwtDecode(tk);
+			console.log('token data:',tk_data);
+			document.getElementById('result').value= JSON.stringify(tk_data,0,2);
+		}
+	}
+
+	claimIfHasCode();
+</script>
+
