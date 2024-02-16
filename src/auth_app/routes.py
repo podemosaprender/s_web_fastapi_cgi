@@ -68,7 +68,9 @@ async def login_for_access_token(
 		except:
 			extra_dict['data']= extra_data
 
-	extra_dict['scope']= extra_dict.get('scope',[])+ scopes_not_validated
+	scope0= extra_dict.get('scope',[])
+	scope0= scope0 if type(scope0)==list else re.split(r'\s+',scope0)
+	extra_dict['scope']= list( set(scope0 + scopes_not_validated) )
 
 	access_token = token_create( data={"sub": user.username,"scope": scopes_auth, "not_validated": extra_dict} )
 
