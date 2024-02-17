@@ -55,7 +55,7 @@ SEE: https://sqlmodel.tiangolo.com/tutorial/fastapi/simple-hero-api/
 
 Create / update users
 ~~~
-(cd src; python -m auth_app.cmd user-update --password secreto xuser1)
+(cd src; python -m auth_app.cmd user-update --password "_voy-a-invitar-amigos_" danger_test_user)
 ~~~
 
 1. Get token with xuser1 / secreto in http://127.0.0.1:8000/docs#/default/login_for_access_token_auth_token_post

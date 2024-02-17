@@ -50,10 +50,10 @@ class HTTPExceptionUnauthorized(HTTPException):
 
 def token_data_novalidate_user(token: TokenT):
 	try:
-		print("TK",token)
+		#CGI: print("TK",token)
 		return jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM])
 	except JWTError as ex:
-		print("TK",token)
+		#CGI: print("TK",token)
 		pass #A: handled below	
 
 	raise HTTPExceptionUnauthorized()
