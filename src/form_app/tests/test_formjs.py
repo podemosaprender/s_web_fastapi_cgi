@@ -6,12 +6,13 @@ import json
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.support import expected_conditions as EC
 #SEE: https://www.selenium.dev/selenium/docs/api/py/webdriver_support/selenium.webdriver.support.expected_conditions.html
+from secrets import token_urlsafe
+import requests
 
 class TestFormjs():
 	def setup_method(self, method):
@@ -22,12 +23,12 @@ class TestFormjs():
 		self.driver.quit()
 	
 	def test_formjs(self):
+		mark= token_urlsafe(10)
 		self.driver.get("http://localhost:8000/static/form_contacto_js.html")
-		self.driver.find_element(By.ID, "name").click()
-		self.driver.find_element(By.ID, "name").send_keys("x1test")
-		self.driver.find_element(By.ID, "email").send_keys("x@test.com")
-		self.driver.find_element(By.ID, "subject").send_keys("x 1 subject <bla> ; sql")
-		self.driver.find_element(By.NAME, "message").send_keys("x1 body\\n<pre>\\n;\\nselect\\n																			 space")
+		self.driver.find_element(By.ID, "name").send_keys(f"xtest {mark}")
+		self.driver.find_element(By.ID, "email").send_keys(f"xtest_delete_me@{mark}.com")
+		self.driver.find_element(By.ID, "subject").send_keys(f"xtest subject <bla> ; sql {mark}")
+		self.driver.find_element(By.NAME, "message").send_keys(f"xtest body\\n<pre>\\n;\\nselect\\n																			 space {mark}")
 		self.driver.find_element(By.CSS_SELECTOR, "button").click()
 		WebDriverWait(self.driver, 30,
 			EC.text_to_be_present_in_element((By.CSS_SELECTOR, ".sent-message"),
@@ -35,3 +36,12 @@ class TestFormjs():
 			)
 		)
 	
+		res= requests.get("http://localhost:8000/data/?fmt=json&entity=any",
+	    headers={ "accept": "application/json" },
+		)
+		data= res.json()
+		match= [d for d in data if mark in d['more_data']]
+		print("MATCH", match)
+		assert len(match)==1		
+
+
