@@ -32,9 +32,15 @@ async def login_with_ui(
 	code_challenge: str= '', #SEE: https://www.oauth.com/oauth2-servers/pkce/authorization-code-exchange/
 	code_challenge_method: str= '',
 	extra_data: str= '',
+	redirect_uri: str='',
 ):
+	referer_clean= re.sub(r'[\?\#].*','',referer) #A: no search params or anchor
+	redirect_uri= redirect_uri or referer_clean
+	if not redirect_uri.startswith(referer_clean): #A:SEC only to the same origin
+		raise HTTPExceptionUnauthorized()
+
 	login_tk= token_create(dict(
-		code=code, state=state, scope=scope, referer= re.sub(r'[\?\#].*','',referer), #A: no search params or anchor
+		code=code, state=state, scope=scope, redirect_uri=redirect_uri, 
 		code_challenge=code_challenge, code_challenge_method=code_challenge_method,
 		extra_data=extra_data,
 	), timedelta(minutes=3)) #A: a temp token only for the login UI
@@ -47,7 +53,7 @@ async def login_for_access_token(
 	extra_data: Annotated[Optional[str], Form()]= None,
 	referer: RefererT= None,
 	tk: Annotated[Optional[str], Form()]= None, #A: the them token only for the login UI
-	redirect_uri: Annotated[Optional[str], Form()]= '',
+	redirect_uri: Annotated[Optional[str], Form()]= '', #A: seen and edited by the user
 ) -> Token:
 		
 	user = await authenticate_user(form_data.username, form_data.password, db_session)
