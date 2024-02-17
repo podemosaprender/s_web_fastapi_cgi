@@ -126,6 +126,11 @@ pytest -k login
 pytest --pyargs form_app
 ~~~
 
+regresion
+~~~
+TEST_HOST='https://api1.o-o.fyi/v1/form' pytest -k form
+~~~
+
 ## SEE ALSO:
 
 https://www.starlette.io/routing/#path-parameters

@@ -13,6 +13,9 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 #SEE: https://www.selenium.dev/selenium/docs/api/py/webdriver_support/selenium.webdriver.support.expected_conditions.html
 from secrets import token_urlsafe
 import requests
+import os
+
+TEST_HOST= os.environ.get('TEST_HOST', 'http://localhost:8000')
 
 class TestFormjs():
 	def setup_method(self, method):
@@ -24,7 +27,7 @@ class TestFormjs():
 	
 	def test_formjs(self):
 		mark= token_urlsafe(10)
-		self.driver.get("http://localhost:8000/static/form_contacto_js.html")
+		self.driver.get(f"{TEST_HOST}/static/form_contacto_js.html")
 		self.driver.find_element(By.ID, "name").send_keys(f"xtest {mark}")
 		self.driver.find_element(By.ID, "email").send_keys(f"xtest_delete_me@{mark}.com")
 		self.driver.find_element(By.ID, "subject").send_keys(f"xtest subject <bla> ; sql {mark}")
@@ -36,7 +39,7 @@ class TestFormjs():
 			)
 		)
 	
-		res= requests.get("http://localhost:8000/data/?fmt=json&entity=any",
+		res= requests.get(f"{TEST_HOST}/data/?fmt=json&entity=any",
 	    headers={ "accept": "application/json" },
 		)
 		data= res.json()

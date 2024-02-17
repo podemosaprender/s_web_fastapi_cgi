@@ -49,7 +49,7 @@ class MiddlewarePostFromAny():
 			await self.app(scope, receive, send)
 			return 
 
-		if scope['path']== '/auth/token/claim':
+		if scope['path'].endswith('/auth/token/claim'): #A: hosting may add prefix, eg xp.cgi
 			return await self.corsPostFromAny(scope,receive,send)
 		else:
 			return await self.corsDefault(scope,receive,send)
